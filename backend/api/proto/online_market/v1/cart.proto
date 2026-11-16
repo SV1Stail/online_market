@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package online_market.api.v1;
+
+option go_package = "github.com/SV1Stail/online_market/gen/online_market/v1;marketv1";
+
+import "google/protobuf/timestamp.proto";
+import "online_market/v1/catalog.proto";
+import "online_market/v1/common.proto";
+
+service CartService {
+  rpc CreateCart(CreateCartRequest) returns (CreateCartResponse);
+  rpc GetCart(GetCartRequest) returns (GetCartResponse);
+  rpc AddCartItem(AddCartItemRequest) returns (AddCartItemResponse);
+  rpc UpdateCartItem(UpdateCartItemRequest) returns (UpdateCartItemResponse);
+  rpc RemoveCartItem(RemoveCartItemRequest) returns (RemoveCartItemResponse);
+  rpc ClearCart(ClearCartRequest) returns (ClearCartResponse);
+}
+
+enum CartStatus {
+  CART_STATUS_UNSPECIFIED = 0;
+  CART_STATUS_OPEN = 1;
+  CART_STATUS_CHECKED_OUT = 2;
+  CART_STATUS_EXPIRED = 3;
+}
+
+message CartItem {
+  // Product images are outside the MVP scope. Keep the former field number and
+  // name reserved so they cannot be accidentally reused with another meaning.
+  reserved 4;
+  reserved "product_image_url";
+
+  string id = 1;
+  string product_id = 2;
+  string product_name = 3;
+  Money unit_price = 5;
+  uint32 quantity = 6;
+  Money line_total = 7;
+  ProductAvailability availability = 8;
+}
+
+message Cart {
+  string id = 1;
+  CartStatus status = 2;
+  repeated CartItem items = 3;
+  Money total = 4;
+  uint64 version = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp expires_at = 8;
+}
+
+message CreateCartRequest {
+  // Currency expected by the client. Initially only RUB is supported.
+  string currency_code = 1;
+}
+
+message CreateCartResponse {
+  Cart cart = 1;
+  // The client must keep this token private and send it in subsequent cart
+  // requests. It is returned only when a cart is created.
+  string cart_token = 2;
+}
+
+message GetCartRequest {
+  string cart_id = 1;
+  string cart_token = 2;
+}
+
+message GetCartResponse {
+  Cart cart = 1;
+}
+
+message AddCartItemRequest {
+  string cart_id = 1;
+  string cart_token = 2;
+  string product_id = 3;
+  uint32 quantity = 4;
+  // Zero disables the optimistic concurrency check.
+  uint64 expected_version = 5;
+}
+
+message AddCartItemResponse {
+  Cart cart = 1;
+}
+
+message UpdateCartItemRequest {
+  string cart_id = 1;
+  string cart_token = 2;
+  string item_id = 3;
+  uint32 quantity = 4;
+  uint64 expected_version = 5;
+}
+
+message UpdateCartItemResponse {
+  Cart cart = 1;
+}
+
+message RemoveCartItemRequest {
+  string cart_id = 1;
+  string cart_token = 2;
+  string item_id = 3;
+  uint64 expected_version = 4;
+}
+
+message RemoveCartItemResponse {
+  Cart cart = 1;
+}
+
+message ClearCartRequest {
+  string cart_id = 1;
+  string cart_token = 2;
+  uint64 expected_version = 3;
+}
+
+message ClearCartResponse {
+  Cart cart = 1;
+}

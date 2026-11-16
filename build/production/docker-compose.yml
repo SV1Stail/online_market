@@ -1,0 +1,75 @@
+name: ${COMPOSE_PROJECT_NAME:-online-market}
+
+x-runtime-environment: &runtime-environment
+  DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+  REDIS_URL: ${REDIS_URL:?REDIS_URL is required}
+  ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:?ACCESS_TOKEN_SECRET is required}
+  ORDER_TOKEN_SECRET: ${ORDER_TOKEN_SECRET:?ORDER_TOKEN_SECRET is required}
+  GRPC_ADDRESS: :8080
+  TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+  ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
+  REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-720h}
+  CART_TTL: ${CART_TTL:-168h}
+  NOTIFICATION_CHANNELS: ${NOTIFICATION_CHANNELS:-}
+  NOTIFICATION_POLL_INTERVAL: ${NOTIFICATION_POLL_INTERVAL:-2s}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+
+x-service-hardening: &service-hardening
+  read_only: true
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+services:
+  migrate:
+    image: ${MIGRATIONS_IMAGE:?MIGRATIONS_IMAGE is required}
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: "no"
+
+  api:
+    <<: *service-hardening
+    image: ${API_IMAGE:?API_IMAGE is required}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment: *runtime-environment
+    ports:
+      - "${GRPC_BIND_ADDRESS:-127.0.0.1}:${GRPC_PORT:-8080}:8080"
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    stop_grace_period: 15s
+
+  admin-create:
+    profiles: ["tools"]
+    image: ${API_IMAGE:?API_IMAGE is required}
+    entrypoint: ["online-market-admin"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      ADMIN_LOGIN: ${ADMIN_LOGIN:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-}
+      ADMIN_ROLES: ${ADMIN_ROLES:-admin}
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: "no"

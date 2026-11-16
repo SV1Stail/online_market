@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package online_market.api.v1;
+
+option go_package = "github.com/SV1Stail/online_market/gen/online_market/v1;marketv1";
+
+import "google/protobuf/timestamp.proto";
+import "online_market/v1/common.proto";
+
+service CatalogService {
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+  rpc GetProduct(GetProductRequest) returns (GetProductResponse);
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+}
+
+enum ProductAvailability {
+  PRODUCT_AVAILABILITY_UNSPECIFIED = 0;
+  PRODUCT_AVAILABILITY_AVAILABLE = 1;
+  PRODUCT_AVAILABILITY_OUT_OF_STOCK = 2;
+  PRODUCT_AVAILABILITY_ARCHIVED = 3;
+}
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string parent_id = 3;
+  uint32 sort_order = 4;
+  uint64 version = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message Product {
+  // Product images are outside the MVP scope. Keep the former field number and
+  // name reserved so they cannot be accidentally reused with another meaning.
+  reserved 6;
+  reserved "images";
+
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  Money price = 4;
+  ProductAvailability availability = 5;
+  repeated string category_ids = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  uint64 version = 10;
+}
+
+message ListProductsRequest {
+  repeated string category_ids = 1;
+  string query = 2;
+  bool only_available = 3;
+  PageRequest page = 4;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  PageResponse page = 2;
+}
+
+message GetProductRequest {
+  string product_id = 1;
+}
+
+message GetProductResponse {
+  Product product = 1;
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+}
