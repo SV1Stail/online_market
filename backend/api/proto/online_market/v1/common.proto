@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package online_market.api.v1;
+
+option go_package = "github.com/SV1Stail/online_market/gen/online_market/v1;marketv1";
+
+// Money stores an amount in the smallest currency unit. For example,
+// 19990 with currency_code "RUB" means 199.90 RUB.
+message Money {
+  int64 minor_units = 1;
+  // ISO 4217 uppercase code.
+  string currency_code = 2;
+}
+
+// PageRequest describes cursor-based pagination. A page token is opaque to a
+// client and must be passed back unchanged.
+message PageRequest {
+  uint32 page_size = 1;
+  string page_token = 2;
+}
+
+message PageResponse {
+  string next_page_token = 1;
+}
+

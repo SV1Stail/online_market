@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package online_market.api.v1;
+
+option go_package = "github.com/SV1Stail/online_market/gen/online_market/v1;marketv1";
+
+import "google/protobuf/field_mask.proto";
+import "online_market/v1/catalog.proto";
+import "online_market/v1/common.proto";
+
+service AdminCatalogService {
+  rpc ListProducts(ListAdminProductsRequest) returns (ListAdminProductsResponse);
+  rpc GetProduct(GetAdminProductRequest) returns (GetAdminProductResponse);
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+  // Products referenced by carts or orders are preserved and marked archived.
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+
+  rpc ListCategories(ListAdminCategoriesRequest) returns (ListAdminCategoriesResponse);
+  rpc GetCategory(GetAdminCategoryRequest) returns (GetAdminCategoryResponse);
+  rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
+  rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+}
+
+message AdminProductFilter {
+  repeated string category_ids = 1;
+  string query = 2;
+  repeated ProductAvailability availabilities = 3;
+}
+
+message ListAdminProductsRequest {
+  AdminProductFilter filter = 1;
+  PageRequest page = 2;
+}
+
+message ListAdminProductsResponse {
+  repeated Product products = 1;
+  PageResponse page = 2;
+}
+
+message GetAdminProductRequest {
+  string product_id = 1;
+}
+
+message GetAdminProductResponse {
+  Product product = 1;
+}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  Money price = 3;
+  ProductAvailability availability = 4;
+  repeated string category_ids = 5;
+}
+
+message CreateProductResponse {
+  Product product = 1;
+}
+
+message ProductPatch {
+  string name = 1;
+  string description = 2;
+  Money price = 3;
+  ProductAvailability availability = 4;
+  repeated string category_ids = 5;
+}
+
+message UpdateProductRequest {
+  string product_id = 1;
+  ProductPatch patch = 2;
+  google.protobuf.FieldMask update_mask = 3;
+  uint64 expected_version = 4;
+}
+
+message UpdateProductResponse {
+  Product product = 1;
+}
+
+message DeleteProductRequest {
+  string product_id = 1;
+  uint64 expected_version = 2;
+}
+
+message DeleteProductResponse {
+  Product product = 1;
+}
+
+message ListAdminCategoriesRequest {}
+
+message ListAdminCategoriesResponse {
+  repeated Category categories = 1;
+}
+
+message GetAdminCategoryRequest {
+  string category_id = 1;
+}
+
+message GetAdminCategoryResponse {
+  Category category = 1;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string parent_id = 2;
+  uint32 sort_order = 3;
+}
+
+message CreateCategoryResponse {
+  Category category = 1;
+}
+
+message CategoryPatch {
+  string name = 1;
+  string parent_id = 2;
+  uint32 sort_order = 3;
+}
+
+message UpdateCategoryRequest {
+  string category_id = 1;
+  CategoryPatch patch = 2;
+  google.protobuf.FieldMask update_mask = 3;
+  uint64 expected_version = 4;
+}
+
+message UpdateCategoryResponse {
+  Category category = 1;
+}
+
+message DeleteCategoryRequest {
+  string category_id = 1;
+  uint64 expected_version = 2;
+}
+
+message DeleteCategoryResponse {}

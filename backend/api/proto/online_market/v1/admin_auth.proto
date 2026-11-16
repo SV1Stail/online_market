@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package online_market.api.v1;
+
+option go_package = "github.com/SV1Stail/online_market/gen/online_market/v1;marketv1";
+
+import "google/protobuf/timestamp.proto";
+
+service AdminAuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc RefreshSession(RefreshSessionRequest) returns (RefreshSessionResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}
+
+enum AdminRole {
+  ADMIN_ROLE_UNSPECIFIED = 0;
+  ADMIN_ROLE_MANAGER = 1;
+  ADMIN_ROLE_ADMIN = 2;
+}
+
+message AdminUser {
+  string id = 1;
+  string display_name = 2;
+  repeated AdminRole roles = 3;
+}
+
+message LoginRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  AdminUser user = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  google.protobuf.Timestamp access_token_expires_at = 4;
+  google.protobuf.Timestamp refresh_token_expires_at = 5;
+}
+
+message RefreshSessionRequest {
+  string refresh_token = 1;
+}
+
+message RefreshSessionResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  google.protobuf.Timestamp access_token_expires_at = 3;
+  google.protobuf.Timestamp refresh_token_expires_at = 4;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutResponse {}
