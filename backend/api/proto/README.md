@@ -4,6 +4,18 @@ Protobuf-контракты в `online_market/v1` задают независи�
 для клиентских приложений и административной панели. Их можно предоставлять
 через gRPC, gRPC-Web, Connect или шлюз HTTP/JSON без изменения прикладного слоя.
 
+HTTP/JSON-маршруты для отдельного gRPC-Gateway описаны во внешней конфигурации
+`http/online_market_v1.yaml`. Она намеренно хранится отдельно от protobuf:
+существующие gRPC-контракты не получают транспортных аннотаций, но генерация
+gateway остаётся детерминированной.
+
+Общие сведения и описания сервисов OpenAPI находятся в
+`http/online_market_v1.openapi.yaml`.
+
+Методы чтения корзины и публичного заказа используют `POST`, потому что
+`cart_token` и `order_token` являются секретами и не должны попадать в URL,
+историю браузера или access-логи.
+
 ## Сервисы
 
 - `CatalogService` предоставляет товары и категории.
@@ -39,6 +51,10 @@ Protobuf-контракты в `online_market/v1` задают независи�
 - Токены корзины и публичного просмотра заказа предоставляют доступ к ресурсу.
   Их следует передавать только через TLS и никогда не записывать в журналы
   приложения.
+- JSON-кодирование соответствует protobuf JSON mapping: имена полей имеют
+  форму `lowerCamelCase`, enum передаются строками, а `int64` и `uint64` —
+  десятичными строками. Это относится в том числе к `Money.minor_units`,
+  `version` и `expected_version`.
 - Все методы `AdminOrderService` и `AdminCatalogService` требуют токен доступа
   в метаданных транспорта: `authorization: Bearer <token>`. Обновление и
   завершение сессии используют токен обновления из сообщения запроса.
@@ -55,13 +71,17 @@ Telegram, WhatsApp или другой канал.
 ## Генерация серверного Go-кода
 
 Из корня репозитория выполните `make proto-generate`. Цель генерирует
-protobuf-сообщения и серверные gRPC-интерфейсы в `backend/gen`.
+protobuf-сообщения, серверные gRPC-интерфейсы и `*.pb.gw.go` в `backend/gen`, а
+объединённую OpenAPI 2.0-схему — в
+`backend/gen/openapi/online_market.swagger.json`.
 
 В `PATH` должны быть заранее доступны следующие инструменты:
 
 - `protoc`;
 - `protoc-gen-go`;
-- `protoc-gen-go-grpc`.
+- `protoc-gen-go-grpc`;
+- `protoc-gen-grpc-gateway`;
+- `protoc-gen-openapiv2`.
 
 Makefile не устанавливает и не обновляет эти инструменты автоматически.
 
@@ -79,7 +99,8 @@ UID и GID пользователя.
 ```shell
 make proto-generate-docker \
   PROTOC_GEN_GO_VERSION=v1.36.12 \
-  PROTOC_GEN_GO_GRPC_VERSION=v1.6.2
+  PROTOC_GEN_GO_GRPC_VERSION=v1.6.2 \
+  PROTOC_GEN_GRPC_GATEWAY_VERSION=v2.32.0
 ```
 
 Для первой сборки образа нужен доступ к реестру Docker, репозиторию пакетов

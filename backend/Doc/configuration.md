@@ -69,6 +69,23 @@ authorization: Bearer <access-token>
 
 The standard gRPC health service is registered on the same listener.
 
+## HTTP/JSON gateway
+
+The HTTP/JSON edge lives in the separate `online_market_gateway` repository.
+This repository keeps protobuf contracts, HTTP mappings and generated
+`*.pb.gw.go` stubs; the gateway process imports those stubs and does not copy
+`.proto` sources.
+
+Compose in `build/` still orchestrates the gateway container next to `api`.
+Gateway environment variables and operational details are documented in
+`online_market_gateway`. For local Compose the important knobs are
+`GATEWAY_PORT`, `GATEWAY_ALLOWED_ORIGINS` and `GATEWAY_GRPC_INSECURE`.
+
+The API must trust the isolated gateway subnet through `TRUSTED_PROXY_CIDRS`.
+When another TLS reverse proxy is placed before the gateway, configure
+`GATEWAY_TRUSTED_PROXY_CIDRS` in the gateway and keep the gateway subnet in
+`TRUSTED_PROXY_CIDRS` here. Do not trust broad private address ranges.
+
 Catalog and cart services have independent shared limits of 100 requests per
 minute and 30 requests per 10 seconds for each client IP. `CreateOrder` uses the
 same limits in its own bucket. `RefreshSession` allows 10 requests per minute
@@ -86,9 +103,10 @@ make backend-local-up
 ```
 
 The command starts PostgreSQL, Redis, applies the migration, builds the API and
-starts grpc-ui. Open `http://127.0.0.1:8081`; the gRPC endpoint itself is
-available at `localhost:8080`. The grpc-ui port can be changed with
-`GRPCUI_PORT` in `build/.env`.
+the sibling `online_market_gateway` image, and starts grpc-ui. Open
+`http://127.0.0.1:8081`; the gRPC endpoint is available at `localhost:8080` and
+the HTTP/JSON endpoint at `http://127.0.0.1:8082`. The ports can be changed with
+`GRPCUI_PORT` and `GATEWAY_PORT` in `build/.env`.
 
 Administrative methods require metadata in the grpc-ui request form:
 

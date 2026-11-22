@@ -1,0 +1,79 @@
+openapiOptions:
+  file:
+    - file: online_market/v1/common.proto
+      option:
+        info:
+          title: Online Market HTTP API
+          description: HTTP/JSON API for the Online Market storefront and administration clients.
+          version: "1.0"
+        schemes:
+          - HTTPS
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        securityDefinitions:
+          security:
+            BearerAuth:
+              type: TYPE_API_KEY
+              name: Authorization
+              in: IN_HEADER
+  service:
+    - service: online_market.api.v1.CatalogService
+      option:
+        description: Public product and category catalog.
+    - service: online_market.api.v1.CartService
+      option:
+        description: Anonymous server-side shopping carts.
+    - service: online_market.api.v1.OrderService
+      option:
+        description: Public checkout and capability-token order lookup.
+    - service: online_market.api.v1.AdminAuthService
+      option:
+        description: Administrator authentication and session rotation.
+    - service: online_market.api.v1.AdminCatalogService
+      option:
+        description: Authenticated catalog administration.
+    - service: online_market.api.v1.AdminOrderService
+      option:
+        description: Authenticated order administration and audit history.
+  method:
+    - method: online_market.api.v1.AdminCatalogService.ListProducts
+      option: &bearer_security
+        security:
+          - securityRequirement:
+              BearerAuth: {}
+    - method: online_market.api.v1.AdminCatalogService.GetProduct
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.CreateProduct
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.UpdateProduct
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.DeleteProduct
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.ListCategories
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.GetCategory
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.CreateCategory
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.UpdateCategory
+      option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.DeleteCategory
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.ListOrders
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.GetOrder
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.UpdateOrderDetails
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.AddOrderItem
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.UpdateOrderItem
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.RemoveOrderItem
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.ChangeOrderStatus
+      option: *bearer_security
+    - method: online_market.api.v1.AdminOrderService.ListOrderEvents
+      option: *bearer_security

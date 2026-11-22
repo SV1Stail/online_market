@@ -1,0 +1,93 @@
+type: google.api.Service
+config_version: 3
+
+http:
+  rules:
+    - selector: online_market.api.v1.CatalogService.ListProducts
+      get: /api/v1/products
+    - selector: online_market.api.v1.CatalogService.GetProduct
+      get: /api/v1/products/{product_id}
+    - selector: online_market.api.v1.CatalogService.ListCategories
+      get: /api/v1/categories
+
+    - selector: online_market.api.v1.CartService.CreateCart
+      post: /api/v1/carts
+      body: "*"
+    - selector: online_market.api.v1.CartService.GetCart
+      post: /api/v1/carts/{cart_id}:get
+      body: "*"
+    - selector: online_market.api.v1.CartService.AddCartItem
+      post: /api/v1/carts/{cart_id}/items
+      body: "*"
+    - selector: online_market.api.v1.CartService.UpdateCartItem
+      patch: /api/v1/carts/{cart_id}/items/{item_id}
+      body: "*"
+    - selector: online_market.api.v1.CartService.RemoveCartItem
+      post: /api/v1/carts/{cart_id}/items/{item_id}:remove
+      body: "*"
+    - selector: online_market.api.v1.CartService.ClearCart
+      post: /api/v1/carts/{cart_id}:clear
+      body: "*"
+
+    - selector: online_market.api.v1.OrderService.CreateOrder
+      post: /api/v1/orders
+      body: "*"
+    - selector: online_market.api.v1.OrderService.GetOrder
+      post: /api/v1/orders:lookup
+      body: "*"
+
+    - selector: online_market.api.v1.AdminAuthService.Login
+      post: /api/v1/admin/auth/login
+      body: "*"
+    - selector: online_market.api.v1.AdminAuthService.RefreshSession
+      post: /api/v1/admin/auth/refresh
+      body: "*"
+    - selector: online_market.api.v1.AdminAuthService.Logout
+      post: /api/v1/admin/auth/logout
+      body: "*"
+
+    - selector: online_market.api.v1.AdminCatalogService.ListProducts
+      get: /api/v1/admin/products
+    - selector: online_market.api.v1.AdminCatalogService.GetProduct
+      get: /api/v1/admin/products/{product_id}
+    - selector: online_market.api.v1.AdminCatalogService.CreateProduct
+      post: /api/v1/admin/products
+      body: "*"
+    - selector: online_market.api.v1.AdminCatalogService.UpdateProduct
+      patch: /api/v1/admin/products/{product_id}
+      body: "*"
+    - selector: online_market.api.v1.AdminCatalogService.DeleteProduct
+      delete: /api/v1/admin/products/{product_id}
+    - selector: online_market.api.v1.AdminCatalogService.ListCategories
+      get: /api/v1/admin/categories
+    - selector: online_market.api.v1.AdminCatalogService.GetCategory
+      get: /api/v1/admin/categories/{category_id}
+    - selector: online_market.api.v1.AdminCatalogService.CreateCategory
+      post: /api/v1/admin/categories
+      body: "*"
+    - selector: online_market.api.v1.AdminCatalogService.UpdateCategory
+      patch: /api/v1/admin/categories/{category_id}
+      body: "*"
+    - selector: online_market.api.v1.AdminCatalogService.DeleteCategory
+      delete: /api/v1/admin/categories/{category_id}
+
+    - selector: online_market.api.v1.AdminOrderService.ListOrders
+      get: /api/v1/admin/orders
+    - selector: online_market.api.v1.AdminOrderService.GetOrder
+      get: /api/v1/admin/orders/{order_id}
+    - selector: online_market.api.v1.AdminOrderService.UpdateOrderDetails
+      patch: /api/v1/admin/orders/{order_id}
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.AddOrderItem
+      post: /api/v1/admin/orders/{order_id}/items
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.UpdateOrderItem
+      patch: /api/v1/admin/orders/{order_id}/items/{item_id}
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.RemoveOrderItem
+      delete: /api/v1/admin/orders/{order_id}/items/{item_id}
+    - selector: online_market.api.v1.AdminOrderService.ChangeOrderStatus
+      post: /api/v1/admin/orders/{order_id}:changeStatus
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.ListOrderEvents
+      get: /api/v1/admin/orders/{order_id}/events

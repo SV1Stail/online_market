@@ -3,6 +3,13 @@
 The backend is a modular Go gRPC application. Generated protobuf code is kept in
 `backend/gen` and is used only at the transport boundary.
 
+Browser clients use a separate HTTP/JSON gateway process from the
+`online_market_gateway` repository. That gateway imports generated
+`*.pb.gw.go` stubs from this repository and calls the native gRPC listener.
+It does not call application services directly, so the complete gRPC
+interceptor chain remains authoritative for authentication, authorization,
+rate limiting, deadlines and error mapping.
+
 ## Modules
 
 - `catalog` reads products and categories.
@@ -13,6 +20,9 @@ The backend is a modular Go gRPC application. Generated protobuf code is kept in
   implementations.
 - `transport/grpcapi` maps protobuf requests to application services and maps
   domain errors to gRPC status codes.
+- Generated `gen/online_market/v1/*.pb.gw.go` stubs are the contract surface
+  consumed by `online_market_gateway`; HTTP mappings live in
+  `api/proto/http/`.
 
 PostgreSQL repositories implement the interfaces declared by application
 modules. Business services do not accept protobuf messages or return generated

@@ -15,6 +15,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
@@ -111,15 +113,15 @@ func TestMVPFlow(t *testing.T) {
 		ExpectedVersion: adminOrders.GetOrders()[0].GetOrder().GetVersion(),
 	})
 	require.NoError(t, err)
-	require.Equal(t, "Приоритетный заказ", renamedOrder.GetOrder().GetName())
+	require.Equal(t, "Приоритетный заказ", renamedOrder.GetOrder().GetOrder().GetName())
 
 	confirmedOrder, err := adminOrderClient.ChangeOrderStatus(adminContext, &marketv1.ChangeOrderStatusRequest{
 		OrderId:         createdOrder.GetOrder().GetId(),
 		Status:          marketv1.OrderStatus_ORDER_STATUS_CONFIRMED,
-		ExpectedVersion: renamedOrder.GetOrder().GetVersion(),
+		ExpectedVersion: renamedOrder.GetOrder().GetOrder().GetVersion(),
 	})
 	require.NoError(t, err)
-	require.Equal(t, marketv1.OrderStatus_ORDER_STATUS_CONFIRMED, confirmedOrder.GetOrder().GetStatus())
+	require.Equal(t, marketv1.OrderStatus_ORDER_STATUS_CONFIRMED, confirmedOrder.GetOrder().GetOrder().GetStatus())
 
 	category, err := adminCatalogClient.CreateCategory(adminContext, &marketv1.CreateCategoryRequest{
 		Name: "Новая категория", SortOrder: 30,
@@ -241,6 +243,9 @@ func newEnvironment(t *testing.T) *environment {
 	marketv1.RegisterAdminAuthServiceServer(server, grpcapi.NewAdminAuthServer(authService))
 	marketv1.RegisterAdminCatalogServiceServer(server, grpcapi.NewAdminCatalogServer(adminCatalogService))
 	marketv1.RegisterAdminOrderServiceServer(server, grpcapi.NewAdminOrderServer(adminOrderService))
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(server, healthServer)
 
 	listener := bufconn.Listen(1024 * 1024)
 	go func() { _ = server.Serve(listener) }()
