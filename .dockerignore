@@ -1,0 +1,6 @@
+.git
+.env
+backend/bin
+build/production/.env
+build/production/.images.env
+
