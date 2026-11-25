@@ -23,7 +23,8 @@
 
 ## Технологии
 
-- Go и gRPC для бэкенда;
+- Go и gRPC для внутреннего API бэкенда;
+- отдельный HTTP/JSON gateway (`online_market_gateway`) для браузерных клиентов;
 - PostgreSQL для основных данных;
 - Redis для распределённого ограничения частоты запросов;
 - Docker и Docker Compose для локального развёртывания и промышленной среды.
@@ -36,6 +37,39 @@
 
 Настройка и локальный запуск описаны в
 `backend/Doc/configuration.md`.
+
+При запуске трёх соседних репозиториев через Docker Compose:
+
+```shell
+make backend-local-up
+make -C ../online_market_gateway local-up
+make -C ../online_market_web/frontend local-up
+```
+
+Откройте `http://localhost:3000`. Веб проксирует `/api` на gateway, а gateway
+подключается к gRPC API через общую сеть `online-market-local`. Backend нужно
+поднять первым, так как он создаёт эту сеть. У каждого репозитория свой
+compose-проект и свой игнорируемый env-файл с локальными настройками.
+
+Доступны также:
+
+- gRPC API — `localhost:8080`;
+- HTTP/JSON API — `http://127.0.0.1:8082`;
+- grpc-ui — `http://127.0.0.1:8081`.
+
+Останавливайте в обратном порядке:
+
+```shell
+make -C ../online_market_web/frontend local-down
+make -C ../online_market_gateway local-down
+make backend-local-down
+```
+
+HTTP-маршруты задаются в
+`backend/api/proto/http/online_market_v1.yaml`, а OpenAPI-файл генерируется в
+`backend/gen/openapi/online_market.swagger.json`. Сам gateway-процесс живёт в
+репозитории `online_market_gateway` и импортирует опубликованный модуль
+контрактов из `contracts/`.
 
 Сборка образов для промышленной среды и развёртывание описаны в
 `build/production/README.md`.

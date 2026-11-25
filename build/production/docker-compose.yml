@@ -6,7 +6,7 @@ x-runtime-environment: &runtime-environment
   ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:?ACCESS_TOKEN_SECRET is required}
   ORDER_TOKEN_SECRET: ${ORDER_TOKEN_SECRET:?ORDER_TOKEN_SECRET is required}
   GRPC_ADDRESS: :8080
-  TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+  TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-172.30.0.0/24}
   ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
   REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-720h}
   CART_TTL: ${CART_TTL:-168h}
@@ -53,6 +53,35 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m
     stop_grace_period: 15s
+    networks:
+      - default
+      - gateway-api
+
+  gateway:
+    <<: *service-hardening
+    image: ${GATEWAY_IMAGE:?GATEWAY_IMAGE is required}
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      GATEWAY_HTTP_ADDRESS: :8080
+      GATEWAY_GRPC_TARGET: api:8080
+      GATEWAY_GRPC_INSECURE: ${GATEWAY_GRPC_INSECURE:-true}
+      GATEWAY_GRPC_CA_CERT_FILE: ${GATEWAY_GRPC_CA_CERT_FILE:-}
+      GATEWAY_GRPC_SERVER_NAME: ${GATEWAY_GRPC_SERVER_NAME:-}
+      GATEWAY_ALLOWED_ORIGINS: ${GATEWAY_ALLOWED_ORIGINS:-}
+      GATEWAY_TRUSTED_PROXY_CIDRS: ${GATEWAY_TRUSTED_PROXY_CIDRS:-}
+      GATEWAY_REQUEST_TIMEOUT: ${GATEWAY_REQUEST_TIMEOUT:-6s}
+      GATEWAY_SHUTDOWN_TIMEOUT: ${GATEWAY_SHUTDOWN_TIMEOUT:-10s}
+      GATEWAY_HEALTH_TIMEOUT: ${GATEWAY_HEALTH_TIMEOUT:-2s}
+      GATEWAY_MAX_REQUEST_BODY_BYTES: ${GATEWAY_MAX_REQUEST_BODY_BYTES:-1048576}
+    ports:
+      - "${GATEWAY_BIND_ADDRESS:-127.0.0.1}:${GATEWAY_PORT:-8082}:8080"
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    stop_grace_period: 15s
+    networks:
+      - gateway-api
 
   admin-create:
     profiles: ["tools"]
@@ -73,3 +102,10 @@ services:
     cap_drop:
       - ALL
     restart: "no"
+
+networks:
+  gateway-api:
+    internal: true
+    ipam:
+      config:
+        - subnet: ${GATEWAY_NETWORK_SUBNET:-172.30.0.0/24}

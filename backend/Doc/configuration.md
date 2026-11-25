@@ -73,15 +73,16 @@ The standard gRPC health service is registered on the same listener.
 
 The HTTP/JSON edge lives in the separate `online_market_gateway` repository.
 This repository keeps protobuf contracts, HTTP mappings and generated
-`*.pb.gw.go` stubs; the gateway process imports those stubs and does not copy
-`.proto` sources.
+`*.pb.gw.go` stubs. A separate `contracts/` Go module publishes generated
+stubs for the gateway while `.proto` sources stay here.
 
-Compose in `build/` still orchestrates the gateway container next to `api`.
+Compose in `build/` starts PostgreSQL, Redis, migrations, the API and grpc-ui.
+The sibling `online_market_gateway` repository has its own Compose project;
+both join the `online-market-local` network created by this project.
 Gateway environment variables and operational details are documented in
-`online_market_gateway`. For local Compose the important knobs are
-`GATEWAY_PORT`, `GATEWAY_ALLOWED_ORIGINS` and `GATEWAY_GRPC_INSECURE`.
+`online_market_gateway`.
 
-The API must trust the isolated gateway subnet through `TRUSTED_PROXY_CIDRS`.
+The API trusts the shared local Compose subnet through `TRUSTED_PROXY_CIDRS`.
 When another TLS reverse proxy is placed before the gateway, configure
 `GATEWAY_TRUSTED_PROXY_CIDRS` in the gateway and keep the gateway subnet in
 `TRUSTED_PROXY_CIDRS` here. Do not trust broad private address ranges.
@@ -94,7 +95,8 @@ request returns `ResourceExhausted` with `google.rpc.RetryInfo`.
 Limited methods fail closed with `Unavailable` when Redis cannot be reached;
 administrative order methods remain independent from the limiter.
 
-For local Docker deployment, copy `build/.env.example` to an untracked `.env`
+For local Docker deployment, `build/.env` contains local-only credentials and
+is ignored by Git. If it is missing, copy `build/.env.example` to `build/.env`
 and fill `POSTGRES_PASSWORD`, `ACCESS_TOKEN_SECRET` and `ORDER_TOKEN_SECRET`.
 Both token secrets must contain at least 32 bytes. Then run:
 
@@ -102,11 +104,14 @@ Both token secrets must contain at least 32 bytes. Then run:
 make backend-local-up
 ```
 
-The command starts PostgreSQL, Redis, applies the migration, builds the API and
-the sibling `online_market_gateway` image, and starts grpc-ui. Open
-`http://127.0.0.1:8081`; the gRPC endpoint is available at `localhost:8080` and
-the HTTP/JSON endpoint at `http://127.0.0.1:8082`. The ports can be changed with
-`GRPCUI_PORT` and `GATEWAY_PORT` in `build/.env`.
+The command starts PostgreSQL, Redis, applies the migration, builds the API,
+and starts grpc-ui. Start the gateway separately with
+`make -C ../online_market_gateway local-up`, then the web container with
+`make -C ../online_market_web/frontend local-up`. Open `http://localhost:3000`.
+The gRPC endpoint is at `localhost:8080`, the HTTP/JSON endpoint at
+`http://127.0.0.1:8082`, and grpc-ui at `http://127.0.0.1:8081`. Backend ports
+are set by `GRPC_PORT`, `POSTGRES_PORT`, `REDIS_PORT`, and `GRPCUI_PORT` in
+`build/.env`.
 
 Administrative methods require metadata in the grpc-ui request form:
 
