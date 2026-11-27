@@ -65,6 +65,9 @@ services:
       NOTIFICATION_CHANNELS: ${NOTIFICATION_CHANNELS:-}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      CATALOG_SEED_FILE: /seed/products.yaml
+    volumes:
+      - ../backend/seed/products.yaml:/seed/products.yaml:ro
     ports:
       - "127.0.0.1:${GRPC_PORT:-8080}:8080"
     healthcheck:

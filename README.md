@@ -67,9 +67,9 @@ make backend-local-down
 
 HTTP-маршруты задаются в
 `backend/api/proto/http/online_market_v1.yaml`, а OpenAPI-файл генерируется в
-`backend/gen/openapi/online_market.swagger.json`. Сам gateway-процесс живёт в
-репозитории `online_market_gateway` и импортирует опубликованный модуль
-контрактов из `contracts/`.
+`backend/gen/openapi/online_market.swagger.json`. Сгенерированный Go-код
+тоже записывается только в `backend/gen`. Gateway в репозитории
+`online_market_gateway` импортирует этот пакет из своего vendor-снимка.
 
 Сборка образов для промышленной среды и развёртывание описаны в
 `build/production/README.md`.
