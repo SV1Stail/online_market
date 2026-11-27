@@ -38,8 +38,17 @@ products and categories through `AdminCatalogService`. Product deletion archives
 the product so existing carts and order history keep valid references. Category
 deletion is rejected while a category has children or assigned products.
 
-The initial migration inserts a small deterministic catalog so a clean MVP
-deployment can exercise browsing, cart and checkout without manual SQL setup.
+When `CATALOG_SEED_FILE` is set, startup reads that YAML before serving.
+The insert runs in one transaction with an advisory lock and only when both
+catalog tables are empty. Each missing `NOT NULL` value is logged with the
+entity, key and field. The same validation text is an `InvalidArgument`
+status message, which the gateway already returns as JSON `message`.
+
+`ImportCatalog` accepts the same YAML from an administrator. An id that already
+exists is updated only in the fields present in the file. A new id is inserted
+with database defaults for omitted optional fields. Rows absent from the file
+are left in place. Missing `NOT NULL` values on a new row reject the whole
+file and use the same status message.
 
 ## Checkout transaction
 

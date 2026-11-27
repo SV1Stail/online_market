@@ -1,0 +1,33 @@
+# Пример каталога для сида и загрузки администратором.
+# id необязателен: без него идентификатор считается из key.
+# Чтобы обновить строку, созданную формой, укажите её id.
+# Цена и минимальная сумма — в копейках.
+# availability: available, out_of_stock, archived.
+
+categories:
+  - key: electronics
+    id: 10000000-0000-4000-8000-000000000011
+    name: Электроника
+    parent: null
+    sort_order: 10
+
+  - key: accessories
+    id: 10000000-0000-4000-8000-000000000012
+    name: Аксессуары
+    parent: electronics
+    sort_order: 20
+
+products:
+  - key: usb-c-cable
+    id: 20000000-0000-4000-8000-000000000011
+    name: Кабель USB-C
+    description: Кабель USB-C длиной 1 метр.
+    price_minor: 79000
+    currency: RUB
+    unit: 1 шт
+    min_order_quantity: 1
+    min_order_amount_minor: 79000
+    availability: available
+    categories:
+      - electronics
+      - accessories

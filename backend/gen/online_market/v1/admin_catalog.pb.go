@@ -1264,6 +1264,119 @@ func (*DeleteCategoryResponse) Descriptor() ([]byte, []int) {
 	return file_online_market_v1_admin_catalog_proto_rawDescGZIP(), []int{22}
 }
 
+type ImportCatalogRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Catalog document in the seed YAML format. At most 1 MiB.
+	Yaml          string `protobuf:"bytes,1,opt,name=yaml,proto3" json:"yaml,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportCatalogRequest) Reset() {
+	*x = ImportCatalogRequest{}
+	mi := &file_online_market_v1_admin_catalog_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportCatalogRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportCatalogRequest) ProtoMessage() {}
+
+func (x *ImportCatalogRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_catalog_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportCatalogRequest.ProtoReflect.Descriptor instead.
+func (*ImportCatalogRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_catalog_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ImportCatalogRequest) GetYaml() string {
+	if x != nil {
+		return x.Yaml
+	}
+	return ""
+}
+
+type ImportCatalogResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	CreatedCategories uint32                 `protobuf:"varint,1,opt,name=created_categories,json=createdCategories,proto3" json:"created_categories,omitempty"`
+	UpdatedCategories uint32                 `protobuf:"varint,2,opt,name=updated_categories,json=updatedCategories,proto3" json:"updated_categories,omitempty"`
+	CreatedProducts   uint32                 `protobuf:"varint,3,opt,name=created_products,json=createdProducts,proto3" json:"created_products,omitempty"`
+	UpdatedProducts   uint32                 `protobuf:"varint,4,opt,name=updated_products,json=updatedProducts,proto3" json:"updated_products,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ImportCatalogResponse) Reset() {
+	*x = ImportCatalogResponse{}
+	mi := &file_online_market_v1_admin_catalog_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportCatalogResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportCatalogResponse) ProtoMessage() {}
+
+func (x *ImportCatalogResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_catalog_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportCatalogResponse.ProtoReflect.Descriptor instead.
+func (*ImportCatalogResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_catalog_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ImportCatalogResponse) GetCreatedCategories() uint32 {
+	if x != nil {
+		return x.CreatedCategories
+	}
+	return 0
+}
+
+func (x *ImportCatalogResponse) GetUpdatedCategories() uint32 {
+	if x != nil {
+		return x.UpdatedCategories
+	}
+	return 0
+}
+
+func (x *ImportCatalogResponse) GetCreatedProducts() uint32 {
+	if x != nil {
+		return x.CreatedProducts
+	}
+	return 0
+}
+
+func (x *ImportCatalogResponse) GetUpdatedProducts() uint32 {
+	if x != nil {
+		return x.UpdatedProducts
+	}
+	return 0
+}
+
 var File_online_market_v1_admin_catalog_proto protoreflect.FileDescriptor
 
 const file_online_market_v1_admin_catalog_proto_rawDesc = "" +
@@ -1354,7 +1467,14 @@ const file_online_market_v1_admin_catalog_proto_rawDesc = "" +
 	"\vcategory_id\x18\x01 \x01(\tR\n" +
 	"categoryId\x12)\n" +
 	"\x10expected_version\x18\x02 \x01(\x04R\x0fexpectedVersion\"\x18\n" +
-	"\x16DeleteCategoryResponse2\xdb\b\n" +
+	"\x16DeleteCategoryResponse\"*\n" +
+	"\x14ImportCatalogRequest\x12\x12\n" +
+	"\x04yaml\x18\x01 \x01(\tR\x04yaml\"\xcb\x01\n" +
+	"\x15ImportCatalogResponse\x12-\n" +
+	"\x12created_categories\x18\x01 \x01(\rR\x11createdCategories\x12-\n" +
+	"\x12updated_categories\x18\x02 \x01(\rR\x11updatedCategories\x12)\n" +
+	"\x10created_products\x18\x03 \x01(\rR\x0fcreatedProducts\x12)\n" +
+	"\x10updated_products\x18\x04 \x01(\rR\x0fupdatedProducts2\xc5\t\n" +
 	"\x13AdminCatalogService\x12o\n" +
 	"\fListProducts\x12..online_market.api.v1.ListAdminProductsRequest\x1a/.online_market.api.v1.ListAdminProductsResponse\x12i\n" +
 	"\n" +
@@ -1366,7 +1486,8 @@ const file_online_market_v1_admin_catalog_proto_rawDesc = "" +
 	"\vGetCategory\x12-.online_market.api.v1.GetAdminCategoryRequest\x1a..online_market.api.v1.GetAdminCategoryResponse\x12k\n" +
 	"\x0eCreateCategory\x12+.online_market.api.v1.CreateCategoryRequest\x1a,.online_market.api.v1.CreateCategoryResponse\x12k\n" +
 	"\x0eUpdateCategory\x12+.online_market.api.v1.UpdateCategoryRequest\x1a,.online_market.api.v1.UpdateCategoryResponse\x12k\n" +
-	"\x0eDeleteCategory\x12+.online_market.api.v1.DeleteCategoryRequest\x1a,.online_market.api.v1.DeleteCategoryResponseBAZ?github.com/SV1Stail/online_market/gen/online_market/v1;marketv1b\x06proto3"
+	"\x0eDeleteCategory\x12+.online_market.api.v1.DeleteCategoryRequest\x1a,.online_market.api.v1.DeleteCategoryResponse\x12h\n" +
+	"\rImportCatalog\x12*.online_market.api.v1.ImportCatalogRequest\x1a+.online_market.api.v1.ImportCatalogResponseBAZ?github.com/SV1Stail/online_market/gen/online_market/v1;marketv1b\x06proto3"
 
 var (
 	file_online_market_v1_admin_catalog_proto_rawDescOnce sync.Once
@@ -1380,7 +1501,7 @@ func file_online_market_v1_admin_catalog_proto_rawDescGZIP() []byte {
 	return file_online_market_v1_admin_catalog_proto_rawDescData
 }
 
-var file_online_market_v1_admin_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_online_market_v1_admin_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_online_market_v1_admin_catalog_proto_goTypes = []any{
 	(*AdminProductFilter)(nil),          // 0: online_market.api.v1.AdminProductFilter
 	(*ListAdminProductsRequest)(nil),    // 1: online_market.api.v1.ListAdminProductsRequest
@@ -1405,38 +1526,40 @@ var file_online_market_v1_admin_catalog_proto_goTypes = []any{
 	(*UpdateCategoryResponse)(nil),      // 20: online_market.api.v1.UpdateCategoryResponse
 	(*DeleteCategoryRequest)(nil),       // 21: online_market.api.v1.DeleteCategoryRequest
 	(*DeleteCategoryResponse)(nil),      // 22: online_market.api.v1.DeleteCategoryResponse
-	(ProductAvailability)(0),            // 23: online_market.api.v1.ProductAvailability
-	(*PageRequest)(nil),                 // 24: online_market.api.v1.PageRequest
-	(*Product)(nil),                     // 25: online_market.api.v1.Product
-	(*PageResponse)(nil),                // 26: online_market.api.v1.PageResponse
-	(*Money)(nil),                       // 27: online_market.api.v1.Money
-	(*fieldmaskpb.FieldMask)(nil),       // 28: google.protobuf.FieldMask
-	(*Category)(nil),                    // 29: online_market.api.v1.Category
+	(*ImportCatalogRequest)(nil),        // 23: online_market.api.v1.ImportCatalogRequest
+	(*ImportCatalogResponse)(nil),       // 24: online_market.api.v1.ImportCatalogResponse
+	(ProductAvailability)(0),            // 25: online_market.api.v1.ProductAvailability
+	(*PageRequest)(nil),                 // 26: online_market.api.v1.PageRequest
+	(*Product)(nil),                     // 27: online_market.api.v1.Product
+	(*PageResponse)(nil),                // 28: online_market.api.v1.PageResponse
+	(*Money)(nil),                       // 29: online_market.api.v1.Money
+	(*fieldmaskpb.FieldMask)(nil),       // 30: google.protobuf.FieldMask
+	(*Category)(nil),                    // 31: online_market.api.v1.Category
 }
 var file_online_market_v1_admin_catalog_proto_depIdxs = []int32{
-	23, // 0: online_market.api.v1.AdminProductFilter.availabilities:type_name -> online_market.api.v1.ProductAvailability
+	25, // 0: online_market.api.v1.AdminProductFilter.availabilities:type_name -> online_market.api.v1.ProductAvailability
 	0,  // 1: online_market.api.v1.ListAdminProductsRequest.filter:type_name -> online_market.api.v1.AdminProductFilter
-	24, // 2: online_market.api.v1.ListAdminProductsRequest.page:type_name -> online_market.api.v1.PageRequest
-	25, // 3: online_market.api.v1.ListAdminProductsResponse.products:type_name -> online_market.api.v1.Product
-	26, // 4: online_market.api.v1.ListAdminProductsResponse.page:type_name -> online_market.api.v1.PageResponse
-	25, // 5: online_market.api.v1.GetAdminProductResponse.product:type_name -> online_market.api.v1.Product
-	27, // 6: online_market.api.v1.CreateProductRequest.price:type_name -> online_market.api.v1.Money
-	23, // 7: online_market.api.v1.CreateProductRequest.availability:type_name -> online_market.api.v1.ProductAvailability
-	27, // 8: online_market.api.v1.CreateProductRequest.min_order_amount:type_name -> online_market.api.v1.Money
-	25, // 9: online_market.api.v1.CreateProductResponse.product:type_name -> online_market.api.v1.Product
-	27, // 10: online_market.api.v1.ProductPatch.price:type_name -> online_market.api.v1.Money
-	23, // 11: online_market.api.v1.ProductPatch.availability:type_name -> online_market.api.v1.ProductAvailability
-	27, // 12: online_market.api.v1.ProductPatch.min_order_amount:type_name -> online_market.api.v1.Money
+	26, // 2: online_market.api.v1.ListAdminProductsRequest.page:type_name -> online_market.api.v1.PageRequest
+	27, // 3: online_market.api.v1.ListAdminProductsResponse.products:type_name -> online_market.api.v1.Product
+	28, // 4: online_market.api.v1.ListAdminProductsResponse.page:type_name -> online_market.api.v1.PageResponse
+	27, // 5: online_market.api.v1.GetAdminProductResponse.product:type_name -> online_market.api.v1.Product
+	29, // 6: online_market.api.v1.CreateProductRequest.price:type_name -> online_market.api.v1.Money
+	25, // 7: online_market.api.v1.CreateProductRequest.availability:type_name -> online_market.api.v1.ProductAvailability
+	29, // 8: online_market.api.v1.CreateProductRequest.min_order_amount:type_name -> online_market.api.v1.Money
+	27, // 9: online_market.api.v1.CreateProductResponse.product:type_name -> online_market.api.v1.Product
+	29, // 10: online_market.api.v1.ProductPatch.price:type_name -> online_market.api.v1.Money
+	25, // 11: online_market.api.v1.ProductPatch.availability:type_name -> online_market.api.v1.ProductAvailability
+	29, // 12: online_market.api.v1.ProductPatch.min_order_amount:type_name -> online_market.api.v1.Money
 	7,  // 13: online_market.api.v1.UpdateProductRequest.patch:type_name -> online_market.api.v1.ProductPatch
-	28, // 14: online_market.api.v1.UpdateProductRequest.update_mask:type_name -> google.protobuf.FieldMask
-	25, // 15: online_market.api.v1.UpdateProductResponse.product:type_name -> online_market.api.v1.Product
-	25, // 16: online_market.api.v1.DeleteProductResponse.product:type_name -> online_market.api.v1.Product
-	29, // 17: online_market.api.v1.ListAdminCategoriesResponse.categories:type_name -> online_market.api.v1.Category
-	29, // 18: online_market.api.v1.GetAdminCategoryResponse.category:type_name -> online_market.api.v1.Category
-	29, // 19: online_market.api.v1.CreateCategoryResponse.category:type_name -> online_market.api.v1.Category
+	30, // 14: online_market.api.v1.UpdateProductRequest.update_mask:type_name -> google.protobuf.FieldMask
+	27, // 15: online_market.api.v1.UpdateProductResponse.product:type_name -> online_market.api.v1.Product
+	27, // 16: online_market.api.v1.DeleteProductResponse.product:type_name -> online_market.api.v1.Product
+	31, // 17: online_market.api.v1.ListAdminCategoriesResponse.categories:type_name -> online_market.api.v1.Category
+	31, // 18: online_market.api.v1.GetAdminCategoryResponse.category:type_name -> online_market.api.v1.Category
+	31, // 19: online_market.api.v1.CreateCategoryResponse.category:type_name -> online_market.api.v1.Category
 	18, // 20: online_market.api.v1.UpdateCategoryRequest.patch:type_name -> online_market.api.v1.CategoryPatch
-	28, // 21: online_market.api.v1.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
-	29, // 22: online_market.api.v1.UpdateCategoryResponse.category:type_name -> online_market.api.v1.Category
+	30, // 21: online_market.api.v1.UpdateCategoryRequest.update_mask:type_name -> google.protobuf.FieldMask
+	31, // 22: online_market.api.v1.UpdateCategoryResponse.category:type_name -> online_market.api.v1.Category
 	1,  // 23: online_market.api.v1.AdminCatalogService.ListProducts:input_type -> online_market.api.v1.ListAdminProductsRequest
 	3,  // 24: online_market.api.v1.AdminCatalogService.GetProduct:input_type -> online_market.api.v1.GetAdminProductRequest
 	5,  // 25: online_market.api.v1.AdminCatalogService.CreateProduct:input_type -> online_market.api.v1.CreateProductRequest
@@ -1447,18 +1570,20 @@ var file_online_market_v1_admin_catalog_proto_depIdxs = []int32{
 	16, // 30: online_market.api.v1.AdminCatalogService.CreateCategory:input_type -> online_market.api.v1.CreateCategoryRequest
 	19, // 31: online_market.api.v1.AdminCatalogService.UpdateCategory:input_type -> online_market.api.v1.UpdateCategoryRequest
 	21, // 32: online_market.api.v1.AdminCatalogService.DeleteCategory:input_type -> online_market.api.v1.DeleteCategoryRequest
-	2,  // 33: online_market.api.v1.AdminCatalogService.ListProducts:output_type -> online_market.api.v1.ListAdminProductsResponse
-	4,  // 34: online_market.api.v1.AdminCatalogService.GetProduct:output_type -> online_market.api.v1.GetAdminProductResponse
-	6,  // 35: online_market.api.v1.AdminCatalogService.CreateProduct:output_type -> online_market.api.v1.CreateProductResponse
-	9,  // 36: online_market.api.v1.AdminCatalogService.UpdateProduct:output_type -> online_market.api.v1.UpdateProductResponse
-	11, // 37: online_market.api.v1.AdminCatalogService.DeleteProduct:output_type -> online_market.api.v1.DeleteProductResponse
-	13, // 38: online_market.api.v1.AdminCatalogService.ListCategories:output_type -> online_market.api.v1.ListAdminCategoriesResponse
-	15, // 39: online_market.api.v1.AdminCatalogService.GetCategory:output_type -> online_market.api.v1.GetAdminCategoryResponse
-	17, // 40: online_market.api.v1.AdminCatalogService.CreateCategory:output_type -> online_market.api.v1.CreateCategoryResponse
-	20, // 41: online_market.api.v1.AdminCatalogService.UpdateCategory:output_type -> online_market.api.v1.UpdateCategoryResponse
-	22, // 42: online_market.api.v1.AdminCatalogService.DeleteCategory:output_type -> online_market.api.v1.DeleteCategoryResponse
-	33, // [33:43] is the sub-list for method output_type
-	23, // [23:33] is the sub-list for method input_type
+	23, // 33: online_market.api.v1.AdminCatalogService.ImportCatalog:input_type -> online_market.api.v1.ImportCatalogRequest
+	2,  // 34: online_market.api.v1.AdminCatalogService.ListProducts:output_type -> online_market.api.v1.ListAdminProductsResponse
+	4,  // 35: online_market.api.v1.AdminCatalogService.GetProduct:output_type -> online_market.api.v1.GetAdminProductResponse
+	6,  // 36: online_market.api.v1.AdminCatalogService.CreateProduct:output_type -> online_market.api.v1.CreateProductResponse
+	9,  // 37: online_market.api.v1.AdminCatalogService.UpdateProduct:output_type -> online_market.api.v1.UpdateProductResponse
+	11, // 38: online_market.api.v1.AdminCatalogService.DeleteProduct:output_type -> online_market.api.v1.DeleteProductResponse
+	13, // 39: online_market.api.v1.AdminCatalogService.ListCategories:output_type -> online_market.api.v1.ListAdminCategoriesResponse
+	15, // 40: online_market.api.v1.AdminCatalogService.GetCategory:output_type -> online_market.api.v1.GetAdminCategoryResponse
+	17, // 41: online_market.api.v1.AdminCatalogService.CreateCategory:output_type -> online_market.api.v1.CreateCategoryResponse
+	20, // 42: online_market.api.v1.AdminCatalogService.UpdateCategory:output_type -> online_market.api.v1.UpdateCategoryResponse
+	22, // 43: online_market.api.v1.AdminCatalogService.DeleteCategory:output_type -> online_market.api.v1.DeleteCategoryResponse
+	24, // 44: online_market.api.v1.AdminCatalogService.ImportCatalog:output_type -> online_market.api.v1.ImportCatalogResponse
+	34, // [34:45] is the sub-list for method output_type
+	23, // [23:34] is the sub-list for method input_type
 	23, // [23:23] is the sub-list for extension type_name
 	23, // [23:23] is the sub-list for extension extendee
 	0,  // [0:23] is the sub-list for field type_name
@@ -1477,7 +1602,7 @@ func file_online_market_v1_admin_catalog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_online_market_v1_admin_catalog_proto_rawDesc), len(file_online_market_v1_admin_catalog_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   23,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

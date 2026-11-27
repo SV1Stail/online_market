@@ -137,6 +137,44 @@
         ]
       }
     },
+    "/api/v1/admin/catalog:import": {
+      "post": {
+        "summary": "Creates missing categories and products and updates only fields present in the YAML file.",
+        "operationId": "AdminCatalogService_ImportCatalog",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ImportCatalogResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ImportCatalogRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AdminCatalogService"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin/categories": {
       "get": {
         "operationId": "AdminCatalogService_ListCategories",
@@ -2306,6 +2344,36 @@
       "properties": {
         "product": {
           "$ref": "#/definitions/v1Product"
+        }
+      }
+    },
+    "v1ImportCatalogRequest": {
+      "type": "object",
+      "properties": {
+        "yaml": {
+          "type": "string",
+          "description": "Catalog document in the seed YAML format. At most 1 MiB."
+        }
+      }
+    },
+    "v1ImportCatalogResponse": {
+      "type": "object",
+      "properties": {
+        "createdCategories": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "updatedCategories": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "createdProducts": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "updatedProducts": {
+          "type": "integer",
+          "format": "int64"
         }
       }
     },

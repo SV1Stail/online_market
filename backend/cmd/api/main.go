@@ -66,6 +66,9 @@ func run(logger *slog.Logger) error {
 	idGenerator := identifier.Generator{}
 
 	catalogRepository := catalog.NewPostgresRepository(pool)
+	if err := seedCatalog(rootContext, logger, catalogRepository, configValue.CatalogSeedFile); err != nil {
+		return err
+	}
 	catalogService := catalog.NewService(catalogRepository)
 	adminCatalogService := catalog.NewAdminService(catalogRepository, idGenerator)
 	cartRepository := cart.NewPostgresRepository(pool)
@@ -177,5 +180,27 @@ func run(logger *slog.Logger) error {
 	case <-time.After(10 * time.Second):
 		grpcServer.Stop()
 	}
+	return nil
+}
+
+func seedCatalog(ctx context.Context, logger *slog.Logger, repository *catalog.PostgresRepository, path string) error {
+	if path == "" {
+		return nil
+	}
+	document, err := catalog.ParseSeedFile(path)
+	if err != nil {
+		catalog.LogSeedError(logger, err)
+		return err
+	}
+	result, err := repository.ApplyBootstrap(ctx, document)
+	if err != nil {
+		catalog.LogSeedError(logger, err)
+		return err
+	}
+	if !result.Applied {
+		logger.Info("catalog seed skipped", "reason", "catalog is not empty")
+		return nil
+	}
+	logger.Info("catalog seed applied", "categories", result.Categories, "products", result.Products)
 	return nil
 }

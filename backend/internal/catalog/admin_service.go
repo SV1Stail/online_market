@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"math"
 	"strings"
 
@@ -50,6 +51,7 @@ type AdminRepository interface {
 	CreateCategory(context.Context, Category) (*Category, error)
 	UpdateCategory(context.Context, string, uint64, CategoryPatch) (*Category, error)
 	DeleteCategory(context.Context, string, uint64) error
+	ApplyImport(context.Context, *SeedDocument) (*ImportResult, error)
 }
 
 type AdminIDGenerator interface {
@@ -232,6 +234,20 @@ func (s *AdminService) UpdateCategory(ctx context.Context, categoryID string, ex
 	result, err := s.repository.UpdateCategory(ctx, categoryID, current.Version, patch)
 	if err != nil {
 		return nil, fmt.Errorf("update category: %w", err)
+	}
+	return result, nil
+}
+
+func (s *AdminService) ImportCatalog(ctx context.Context, payload []byte) (*ImportResult, error) {
+	document, err := ParseCatalogFile(payload)
+	if err != nil {
+		LogSeedError(slog.Default(), err)
+		return nil, err
+	}
+	result, err := s.repository.ApplyImport(ctx, document)
+	if err != nil {
+		LogSeedError(slog.Default(), err)
+		return nil, err
 	}
 	return result, nil
 }

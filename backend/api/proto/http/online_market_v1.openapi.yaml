@@ -61,6 +61,8 @@ openapiOptions:
       option: *bearer_security
     - method: online_market.api.v1.AdminCatalogService.DeleteCategory
       option: *bearer_security
+    - method: online_market.api.v1.AdminCatalogService.ImportCatalog
+      option: *bearer_security
     - method: online_market.api.v1.AdminOrderService.ListOrders
       option: *bearer_security
     - method: online_market.api.v1.AdminOrderService.GetOrder

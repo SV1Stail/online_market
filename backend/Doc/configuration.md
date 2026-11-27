@@ -36,6 +36,11 @@ The API reads configuration from environment variables.
   Without this setting rate limits use the direct peer IP.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` — required when the `telegram`
   channel is enabled.
+- `CATALOG_SEED_FILE` — optional path of a catalog YAML file. When it is set
+  and both `categories` and `products` are empty, the API inserts that file
+  once during startup. A restart with any catalog row leaves the database
+  unchanged. An empty value disables seeding. Local Compose mounts
+  `backend/seed/products.yaml` at `/seed/products.yaml`.
 
 ## Initial setup
 
@@ -78,9 +83,9 @@ The standard gRPC health service is registered on the same listener.
 ## HTTP/JSON gateway
 
 The HTTP/JSON edge lives in the separate `online_market_gateway` repository.
-This repository keeps protobuf contracts, HTTP mappings and generated
-`*.pb.gw.go` stubs. A separate `contracts/` Go module publishes generated
-stubs for the gateway while `.proto` sources stay here.
+This repository keeps protobuf contracts, HTTP mappings and the only generated
+Go stubs, in `backend/gen`. The gateway builds from a vendor snapshot of that
+package and does not generate a second copy.
 
 Compose in `build/` starts PostgreSQL, Redis, migrations, the API and grpc-ui.
 The sibling `online_market_gateway` repository has its own Compose project;

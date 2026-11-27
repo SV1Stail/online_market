@@ -186,6 +186,10 @@ func (s *adminRepositoryStub) DeleteCategory(context.Context, string, uint64) er
 	return nil
 }
 
+func (s *adminRepositoryStub) ApplyImport(context.Context, *SeedDocument) (*ImportResult, error) {
+	return &ImportResult{}, nil
+}
+
 type adminIDGeneratorStub struct {
 	id string
 }

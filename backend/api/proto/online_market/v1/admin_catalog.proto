@@ -21,6 +21,9 @@ service AdminCatalogService {
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
   rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
   rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+
+  // Creates missing categories and products and updates only fields present in the YAML file.
+  rpc ImportCatalog(ImportCatalogRequest) returns (ImportCatalogResponse);
 }
 
 message AdminProductFilter {
@@ -146,3 +149,15 @@ message DeleteCategoryRequest {
 }
 
 message DeleteCategoryResponse {}
+
+message ImportCatalogRequest {
+  // Catalog document in the seed YAML format. At most 1 MiB.
+  string yaml = 1;
+}
+
+message ImportCatalogResponse {
+  uint32 created_categories = 1;
+  uint32 updated_categories = 2;
+  uint32 created_products = 3;
+  uint32 updated_products = 4;
+}

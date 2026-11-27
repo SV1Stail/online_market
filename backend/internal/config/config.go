@@ -28,6 +28,7 @@ type Config struct {
 	NotificationPollInterval time.Duration
 	DeliveryDailyLimit       int
 	MinOrderTotalMinor       int64
+	CatalogSeedFile          string
 }
 
 func Load() (*Config, error) {
@@ -113,6 +114,7 @@ func Load() (*Config, error) {
 		NotificationPollInterval: pollInterval,
 		DeliveryDailyLimit:       deliveryDailyLimit,
 		MinOrderTotalMinor:       minOrderTotalMinor,
+		CatalogSeedFile:          strings.TrimSpace(os.Getenv("CATALOG_SEED_FILE")),
 	}, nil
 }
 
