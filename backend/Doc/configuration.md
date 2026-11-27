@@ -83,9 +83,8 @@ The standard gRPC health service is registered on the same listener.
 ## HTTP/JSON gateway
 
 The HTTP/JSON edge lives in the separate `online_market_gateway` repository.
-This repository keeps protobuf contracts, HTTP mappings and the only generated
-Go stubs, in `backend/gen`. The gateway builds from a vendor snapshot of that
-package and does not generate a second copy.
+This repository keeps protobuf contracts, HTTP mappings and generated Go stubs
+in `backend/gen`. The gateway keeps its own copy under `api/proto` and `gen/`.
 
 Compose in `build/` starts PostgreSQL, Redis, migrations, the API and grpc-ui.
 The sibling `online_market_gateway` repository has its own Compose project;

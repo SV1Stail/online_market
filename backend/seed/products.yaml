@@ -1,33 +1,1174 @@
-# Пример каталога для сида и загрузки администратором.
+# Каталог ООО «Гольфстрим» по прайсу от 23 ноября 2026 г.
 # id необязателен: без него идентификатор считается из key.
-# Чтобы обновить строку, созданную формой, укажите её id.
 # Цена и минимальная сумма — в копейках.
 # availability: available, out_of_stock, archived.
+# unit — колонка «фасовка». min_order_quantity — её размер
+# (нижняя граница диапазона; дробный вес округлён вниз до целого).
+# Позиции, которые повторяются на каждой странице прайса, записаны один раз.
 
 categories:
-  - key: electronics
-    id: 10000000-0000-4000-8000-000000000011
-    name: Электроника
+  - key: seafood
+    name: Рыба и морепродукты
     parent: null
     sort_order: 10
 
-  - key: accessories
-    id: 10000000-0000-4000-8000-000000000012
-    name: Аксессуары
-    parent: electronics
+  - key: red-fish
+    name: Красная рыба
+    parent: seafood
     sort_order: 20
 
+  - key: local-fish
+    name: Местная рыба
+    parent: seafood
+    sort_order: 30
+
+  - key: fillet
+    name: Филейная группа
+    parent: seafood
+    sort_order: 40
+
+  - key: other-sea-fish
+    name: Другая морская рыба
+    parent: seafood
+    sort_order: 50
+
+  - key: shrimp
+    name: Креветки
+    parent: seafood
+    sort_order: 60
+
+  - key: sea-products
+    name: Морепродукты
+    parent: seafood
+    sort_order: 70
+
+  - key: meat
+    name: Мясо
+    parent: null
+    sort_order: 80
+
+  - key: beef
+    name: Говядина
+    parent: meat
+    sort_order: 90
+
+  - key: beef-offal
+    name: Субпродукты говяжьи
+    parent: meat
+    sort_order: 100
+
+  - key: pork
+    name: Свинина
+    parent: meat
+    sort_order: 110
+
+  - key: poultry
+    name: Птица
+    parent: null
+    sort_order: 120
+
+  - key: chicken
+    name: Куры
+    parent: poultry
+    sort_order: 130
+
+  - key: chicken-bulk
+    name: Куриные полуфабрикаты весовые
+    parent: poultry
+    sort_order: 140
+
+  - key: chicken-packed
+    name: Куриные полуфабрикаты фасованные
+    parent: poultry
+    sort_order: 150
+
+  - key: chicken-offal
+    name: Субпродукты куриные
+    parent: poultry
+    sort_order: 160
+
+  - key: pizza
+    name: Пицца
+    parent: null
+    sort_order: 170
+
+  - key: zhar-pizza
+    name: Жар-пицца
+    parent: pizza
+    sort_order: 180
+
+  - key: frozen
+    name: Заморозка
+    parent: null
+    sort_order: 190
+
+  - key: berries
+    name: Ягода весовая
+    parent: frozen
+    sort_order: 200
+
+  - key: vegetables
+    name: Овощи, грибы нефасованные
+    parent: frozen
+    sort_order: 210
+
+  - key: dough
+    name: Тесто замороженное
+    parent: frozen
+    sort_order: 220
+
+  - key: extras
+    name: Попутные позиции
+    parent: null
+    sort_order: 230
+
 products:
-  - key: usb-c-cable
-    id: 20000000-0000-4000-8000-000000000011
-    name: Кабель USB-C
-    description: Кабель USB-C длиной 1 метр.
-    price_minor: 79000
+  - key: salmon-chile-5-6
+    name: 5-6 Чили Лосось атлантический ПСГ с/м (Семга)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 145000
     currency: RUB
-    unit: 1 шт
-    min_order_quantity: 1
-    min_order_amount_minor: 79000
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 145000
     availability: available
     categories:
-      - electronics
-      - accessories
+      - seafood
+      - red-fish
+
+  - key: salmon-chile-6-7
+    name: 6-7 Чили Лосось атлантический ПСГ с/м (Семга)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 150000
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 150000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: salmon-chile-7-8
+    name: 7-8 Чили Лосось атлантический ПСГ с/м (Семга)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 155000
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 155000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: salmon-chile-8-9
+    name: 8-9 Чили Лосось атлантический ПСГ с/м (Семга)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 160000
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 160000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: salmon-chile-9-plus
+    name: 9+ Чили Лосось атлантический ПСГ с/м (Семга)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 165000
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 165000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: keta-pbg-2026
+    name: Кета ПБГ свежий улов 2026
+    description: "Фасовка: мешок ~ 22 кг"
+    price_minor: 105000
+    currency: RUB
+    unit: "мешок ~ 22 кг"
+    min_order_quantity: 22
+    min_order_amount_minor: 105000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: trout-headless-turkey
+    name: Форель Без головы 2,7+ (Турция)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 140000
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 140000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: trout-headless-china
+    name: Форель Без головы 2,7-4,0+ (КНР)
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 150000
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 150000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: trout-4-china
+    name: Форель 4,0+ (КНР) 1/27,09 кг
+    description: "Фасовка: коробка 27,09 кг"
+    price_minor: 160000
+    currency: RUB
+    unit: "коробка 27,09 кг"
+    min_order_quantity: 27
+    min_order_amount_minor: 160000
+    availability: available
+    categories:
+      - seafood
+      - red-fish
+
+  - key: chir-cutlets
+    name: Котлеты рыбные из чира (пакет 500 гр)
+    description: "Фасовка: цена за 500 гр."
+    price_minor: 49000
+    currency: RUB
+    unit: цена за 500 гр.
+    min_order_quantity: 1
+    min_order_amount_minor: 49000
+    availability: available
+    categories:
+      - seafood
+      - local-fish
+
+  - key: chir-mince
+    name: Фарш рыбный из чира 0,8 кг (Арктика-Ас)
+    description: "Фасовка: цена за 800 гр."
+    price_minor: 49000
+    currency: RUB
+    unit: цена за 800 гр.
+    min_order_quantity: 1
+    min_order_amount_minor: 49000
+    availability: available
+    categories:
+      - seafood
+      - local-fish
+
+  - key: squid-tube
+    name: Кальмар тушка неочищенный (два пласта по 11 кг)
+    description: "Фасовка: коробка 22 кг"
+    price_minor: 44000
+    currency: RUB
+    unit: коробка 22 кг
+    min_order_quantity: 22
+    min_order_amount_minor: 44000
+    availability: available
+    categories:
+      - seafood
+      - fillet
+
+  - key: pangasius-fillet
+    name: Морской язык (филе пангасиуса) 1/10
+    description: "Фасовка: коробка 10 кг"
+    price_minor: 32000
+    currency: RUB
+    unit: коробка 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 32000
+    availability: available
+    categories:
+      - seafood
+      - fillet
+
+  - key: squid-fillet
+    name: Филе кальмара весовое 1/8
+    description: "Фасовка: коробка 8 кг"
+    price_minor: 74000
+    currency: RUB
+    unit: коробка 8 кг
+    min_order_quantity: 8
+    min_order_amount_minor: 74000
+    availability: available
+    categories:
+      - seafood
+      - fillet
+
+  - key: tilapia-fillet
+    name: Филе тилапии штучной заморозки 1/10
+    description: "Фасовка: коробка 10 кг"
+    price_minor: 49000
+    currency: RUB
+    unit: коробка 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 49000
+    availability: available
+    categories:
+      - seafood
+      - fillet
+
+  - key: pollock
+    name: Минтай свежемороженный без головы (2 пласта по ~ 12,5 кг)
+    description: "Фасовка: коробка 25 кг"
+    price_minor: 29000
+    currency: RUB
+    unit: коробка 25 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 29000
+    availability: available
+    categories:
+      - seafood
+      - other-sea-fish
+
+  - key: herring-olyutorskaya
+    name: Сельдь Олюторская 300-400 с/м (два пласта по 10 кг) 1/20
+    description: "Фасовка: коробка 20 кг"
+    price_minor: 25000
+    currency: RUB
+    unit: коробка 20 кг
+    min_order_quantity: 20
+    min_order_amount_minor: 25000
+    availability: available
+    categories:
+      - seafood
+      - other-sea-fish
+
+  - key: tuna-portion
+    name: Тунец 50+ (порционный)
+    description: "Фасовка: коробка 10 кг"
+    price_minor: 95000
+    currency: RUB
+    unit: коробка 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 95000
+    availability: available
+    categories:
+      - seafood
+      - other-sea-fish
+
+  - key: shrimp-northern-80-100
+    name: Креветка Северная 80-100 н/р 14% глазурь фас 0,8 кг*12 шт
+    description: "Фасовка: коробка 12 шт"
+    price_minor: 63000
+    currency: RUB
+    unit: коробка 12 шт
+    min_order_quantity: 12
+    min_order_amount_minor: 63000
+    availability: available
+    categories:
+      - seafood
+      - shrimp
+
+  - key: scallop-meat
+    name: Гребешок мясо с/м 40-60 шт фас 1 кг*10 шт
+    description: "Фасовка: коробка 10 шт"
+    price_minor: 78000
+    currency: RUB
+    unit: коробка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 78000
+    availability: available
+    categories:
+      - seafood
+      - sea-products
+
+  - key: crab-sticks
+    name: Крабовые палочки 200 гр
+    description: "Фасовка: коробка 30 шт"
+    price_minor: 6000
+    currency: RUB
+    unit: коробка 30 шт
+    min_order_quantity: 30
+    min_order_amount_minor: 6000
+    availability: available
+    categories:
+      - seafood
+      - sea-products
+
+  - key: clams-vongole
+    name: Клемы Вонголе в раковине в/м в собст. соку 31-40 шт фас по 0.5 кг
+    description: "Фасовка: Коробка 20 шт"
+    price_minor: 25000
+    currency: RUB
+    unit: Коробка 20 шт
+    min_order_quantity: 20
+    min_order_amount_minor: 25000
+    availability: available
+    categories:
+      - seafood
+      - sea-products
+
+  - key: sea-cocktail
+    name: Морской коктейль фас по 1 кг
+    description: "Фасовка: коробка 10 кг"
+    price_minor: 43000
+    currency: RUB
+    unit: коробка 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 43000
+    availability: available
+    categories:
+      - seafood
+      - sea-products
+
+  - key: beef-silverside
+    name: Говядина б/к задняя часть (Сильверсайд)
+    description: "Фасовка: коробка 20-25 кг"
+    price_minor: 89000
+    currency: RUB
+    unit: коробка 20-25 кг
+    min_order_quantity: 20
+    min_order_amount_minor: 89000
+    availability: available
+    categories:
+      - meat
+      - beef
+
+  - key: beef-forequarter
+    name: Говядина б/к передняя часть
+    description: "Фасовка: коробка 20-25 кг"
+    price_minor: 81000
+    currency: RUB
+    unit: коробка 20-25 кг
+    min_order_quantity: 20
+    min_order_amount_minor: 81000
+    availability: available
+    categories:
+      - meat
+      - beef
+
+  - key: beef-liver
+    name: Печень говяжья
+    description: "Фасовка: коробка ~ 20 кг"
+    price_minor: 34000
+    currency: RUB
+    unit: "коробка ~ 20 кг"
+    min_order_quantity: 20
+    min_order_amount_minor: 34000
+    availability: available
+    categories:
+      - meat
+      - beef-offal
+
+  - key: beef-heart
+    name: Сердце говяжье
+    description: "Фасовка: коробка ~ 20 кг"
+    price_minor: 42000
+    currency: RUB
+    unit: "коробка ~ 20 кг"
+    min_order_quantity: 20
+    min_order_amount_minor: 42000
+    availability: available
+    categories:
+      - meat
+      - beef-offal
+
+  - key: beef-tongue-minerva
+    name: "Язык говяжий \"Минерва\" (Парагвай)"
+    description: "Фасовка: коробка ~ 20 кг"
+    price_minor: 78000
+    currency: RUB
+    unit: "коробка ~ 20 кг"
+    min_order_quantity: 20
+    min_order_amount_minor: 78000
+    availability: available
+    categories:
+      - meat
+      - beef-offal
+
+  - key: pork-shoulder
+    name: Лопатка свиная б/к в/у Тамбовский бекон
+    description: "Фасовка: коробка ~ 8 кг"
+    price_minor: 37000
+    currency: RUB
+    unit: "коробка ~ 8 кг"
+    min_order_quantity: 8
+    min_order_amount_minor: 37000
+    availability: available
+    categories:
+      - meat
+      - pork
+
+  - key: pork-carbonade
+    name: Карбонад свиной Россия б/к
+    description: "Фасовка: коробка 25-30 кг"
+    price_minor: 43500
+    currency: RUB
+    unit: коробка 25-30 кг
+    min_order_quantity: 25
+    min_order_amount_minor: 43500
+    availability: available
+    categories:
+      - meat
+      - pork
+
+  - key: pork-ribs-delicacy
+    name: Ребрышки свиные Деликатесные Тамбовский Бекон в/у
+    description: "Фасовка: коробка ~ 13-15 кг"
+    price_minor: 39500
+    currency: RUB
+    unit: "коробка ~ 13-15 кг"
+    min_order_quantity: 13
+    min_order_amount_minor: 39500
+    availability: available
+    categories:
+      - meat
+      - pork
+
+  - key: pork-ribs-meat
+    name: Ребрышки свиные Мясные Тамбовский Бекон в/у
+    description: "Фасовка: коробка ~ 13-15 кг"
+    price_minor: 36000
+    currency: RUB
+    unit: "коробка ~ 13-15 кг"
+    min_order_quantity: 13
+    min_order_amount_minor: 36000
+    availability: available
+    categories:
+      - meat
+      - pork
+
+  - key: pork-ribs-loin
+    name: Ребрышки свиные с корейки Тамбовский Бекон в/у
+    description: "Фасовка: коробка ~ 13-15 кг"
+    price_minor: 55000
+    currency: RUB
+    unit: "коробка ~ 13-15 кг"
+    min_order_quantity: 13
+    min_order_amount_minor: 55000
+    availability: available
+    categories:
+      - meat
+      - pork
+
+  - key: pork-neck
+    name: Шея свиная б/к в/у Тамбовский бекон
+    description: "Фасовка: коробка ~ 8 кг"
+    price_minor: 53000
+    currency: RUB
+    unit: "коробка ~ 8 кг"
+    min_order_quantity: 8
+    min_order_amount_minor: 53000
+    availability: available
+    categories:
+      - meat
+      - pork
+
+  - key: chicken-tsarstvo-bulk
+    name: ЦБ Куриное Царство ВЕСОВАЯ без фасовки (отпускается коробкой)
+    description: "Фасовка: коробка ~13-15 кг. Отпускается коробкой."
+    price_minor: 32000
+    currency: RUB
+    unit: "коробка ~13-15 кг"
+    min_order_quantity: 13
+    min_order_amount_minor: 32000
+    availability: available
+    categories:
+      - poultry
+      - chicken
+
+  - key: chicken-drumstick-bulk
+    name: Голень ЦБ Куриное Царство весовая
+    description: "Фасовка: коробка ~14 кг"
+    price_minor: 29000
+    currency: RUB
+    unit: "коробка ~14 кг"
+    min_order_quantity: 14
+    min_order_amount_minor: 29000
+    availability: available
+    categories:
+      - poultry
+      - chicken-bulk
+
+  - key: chicken-leg-brazil
+    name: Окорочка куриные (Бразилия) 1/15
+    description: "Фасовка: коробка 15 кг"
+    price_minor: 32000
+    currency: RUB
+    unit: коробка 15 кг
+    min_order_quantity: 15
+    min_order_amount_minor: 32000
+    availability: available
+    categories:
+      - poultry
+      - chicken-bulk
+
+  - key: chicken-wing-herringbone
+    name: Крыло куриное (елочка) Руспродторг (2 пласта*10 кг) весовое
+    description: "Фасовка: коробка 20 кг"
+    price_minor: 32000
+    currency: RUB
+    unit: коробка 20 кг
+    min_order_quantity: 20
+    min_order_amount_minor: 32000
+    availability: available
+    categories:
+      - poultry
+      - chicken-bulk
+
+  - key: chicken-thigh-packed
+    name: Бедро ЦБ Ресурс-Юг (подложка)
+    description: "Фасовка: коробка ~8-10 кг"
+    price_minor: 31000
+    currency: RUB
+    unit: "коробка ~8-10 кг"
+    min_order_quantity: 8
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - poultry
+      - chicken-packed
+
+  - key: chicken-drumstick-packed
+    name: Голень ЦБ Куриное Царство (подложка)
+    description: "Фасовка: коробка ~10 кг"
+    price_minor: 30000
+    currency: RUB
+    unit: "коробка ~10 кг"
+    min_order_quantity: 10
+    min_order_amount_minor: 30000
+    availability: available
+    categories:
+      - poultry
+      - chicken-packed
+
+  - key: chicken-wing-packed
+    name: Крыло ЦБ Руспродторг (подложка)
+    description: "Фасовка: коробка ~10 кг"
+    price_minor: 33000
+    currency: RUB
+    unit: "коробка ~10 кг"
+    min_order_quantity: 10
+    min_order_amount_minor: 33000
+    availability: available
+    categories:
+      - poultry
+      - chicken-packed
+
+  - key: chicken-heart
+    name: Сердце куриное ЦБ Куриное Царство (подложка)
+    description: "Фасовка: коробка ~8 кг"
+    price_minor: 41000
+    currency: RUB
+    unit: "коробка ~8 кг"
+    min_order_quantity: 8
+    min_order_amount_minor: 41000
+    availability: available
+    categories:
+      - poultry
+      - chicken-offal
+
+  - key: chicken-liver
+    name: Печень куриная ЦБ Куриное Царство (подложка) 1/3,6 кг
+    description: "Фасовка: коробка 3,6 кг"
+    price_minor: 32000
+    currency: RUB
+    unit: "коробка 3,6 кг"
+    min_order_quantity: 3
+    min_order_amount_minor: 32000
+    availability: available
+    categories:
+      - poultry
+      - chicken-offal
+
+  - key: pizza-assorti
+    name: Пицца Сахапицца Ассорти
+    description: "Фасовка: Упаковка 10 шт"
+    price_minor: 31000
+    currency: RUB
+    unit: Упаковка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - pizza
+      - zhar-pizza
+
+  - key: pizza-ham
+    name: Пицца Сахапицца Ветчина
+    description: "Фасовка: Упаковка 10 шт"
+    price_minor: 31000
+    currency: RUB
+    unit: Упаковка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - pizza
+      - zhar-pizza
+
+  - key: pizza-pepperoni
+    name: Пицца Сахапицца Пепперони
+    description: "Фасовка: Упаковка 10 шт"
+    price_minor: 31000
+    currency: RUB
+    unit: Упаковка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - pizza
+      - zhar-pizza
+
+  - key: pizza-ham-mushrooms
+    name: Пицца Сахапицца Ветчина с грибами
+    description: "Фасовка: Упаковка 10 шт"
+    price_minor: 31000
+    currency: RUB
+    unit: Упаковка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - pizza
+      - zhar-pizza
+
+  - key: pizza-chicken
+    name: Пицца Сахапицца С курицей
+    description: "Фасовка: Упаковка 10 шт"
+    price_minor: 31000
+    currency: RUB
+    unit: Упаковка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - pizza
+      - zhar-pizza
+
+  - key: pizza-salami
+    name: Пицца Сахапицца Салями
+    description: "Фасовка: Упаковка 10 шт"
+    price_minor: 31000
+    currency: RUB
+    unit: Упаковка 10 шт
+    min_order_quantity: 10
+    min_order_amount_minor: 31000
+    availability: available
+    categories:
+      - pizza
+      - zhar-pizza
+
+  - key: lingonberry
+    name: Брусника замороженная весовая Россия
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 65000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 65000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: sour-cherry
+    name: Вишня 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 54000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 54000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: blackberry
+    name: Ежевика 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 45000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 45000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: strawberry-egypt
+    name: Клубника EI Swedy (Египет) 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 28000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 28000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: cranberry-china
+    name: Клюква садовая (Китай) 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 39500
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 39500
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: red-currant
+    name: Красная смородина 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 52000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 52000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: compote-mix-1
+    name: Компотная смесь №1 фруктово-ягодная 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 25000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 25000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: compote-mix-3
+    name: Компотная смесь №3 фруктово-ягодная 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 23000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 23000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: raspberry-crumb
+    name: Малина весовая ГРИС (крошка) 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 65000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 65000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: sea-buckthorn
+    name: Облепиха весовая 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 27000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 27000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: chokeberry
+    name: Рябина черноплодная 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 29000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 29000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: black-currant
+    name: Черная смородина 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 59000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 59000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: sweet-cherry
+    name: Черешня 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 67000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 67000
+    availability: available
+    categories:
+      - frozen
+      - berries
+
+  - key: borscht-mix
+    name: Борщ ТД Лед Эксперт 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 16500
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 16500
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: broccoli
+    name: Брокколи весовая 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 23000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 23000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: hawaiian-mix
+    name: Гавайская смесь 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 20000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 20000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: spring-mix
+    name: Весенняя смесь весовая 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 22000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 22000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: european-mix
+    name: Европейская смесь ТД Лед Эксперт 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 22000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 22000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: fries-straight
+    name: Картофель Фри прямой 10*10 мм 2.5 кг*4 шт
+    description: "Фасовка: коробка 10 кг"
+    price_minor: 56000
+    currency: RUB
+    unit: коробка 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 56000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: lecho
+    name: Лечо (весовое 10 кг)
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 19000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 19000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: mexican-mix
+    name: Мексиканская смесь 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 19000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 19000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: fry-vegetables
+    name: Овощи для жарки с грибами и картоф. дольками 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 20000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 20000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: summer-vegetables
+    name: Овощная смесь Летние овощи 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 19000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 19000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: paprikash
+    name: Паприкаш (весовой) 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 20000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 20000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: ratatouille
+    name: Рататуй ТД Лед Эксперт 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 20000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 20000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: green-beans
+    name: Фасоль стручковая резанная 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 21000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 21000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: cauliflower
+    name: Цветная капуста (весовая) 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 22000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 22000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: champignons
+    name: Шампиньоны резанные весовые 1/10
+    description: "Фасовка: россыпь 10 кг"
+    price_minor: 21000
+    currency: RUB
+    unit: россыпь 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 21000
+    availability: available
+    categories:
+      - frozen
+      - vegetables
+
+  - key: puff-pastry
+    name: Тесто слоеное Дрожжевое (117) 0,5 кг*12 шт
+    description: "Фасовка: коробка 12 шт."
+    price_minor: 14000
+    currency: RUB
+    unit: коробка 12 шт.
+    min_order_quantity: 12
+    min_order_amount_minor: 14000
+    availability: available
+    categories:
+      - frozen
+      - dough
+
+  - key: chicken-heads
+    name: Головы куриные ПФ Северная 1/15 (отпускается коробкой)
+    description: "Фасовка: Коробка 15 кг. Отпускается коробкой."
+    price_minor: 7000
+    currency: RUB
+    unit: Коробка 15 кг
+    min_order_quantity: 15
+    min_order_amount_minor: 7000
+    availability: available
+    categories:
+      - extras
+
+  - key: butter-krestyanskoe
+    name: Масло сливоч. Крестьянское монолит 1/5 Брянск
+    description: "Фасовка: Коробка 5 кг"
+    price_minor: 84000
+    currency: RUB
+    unit: Коробка 5 кг
+    min_order_quantity: 5
+    min_order_amount_minor: 84000
+    availability: available
+    categories:
+      - extras
+
+  - key: mozzarella
+    name: Сыр Моцарелла тертый Россия (фасовка по 1 кг)
+    description: "Фасовка: Коробка 10 кг"
+    price_minor: 65000
+    currency: RUB
+    unit: Коробка 10 кг
+    min_order_quantity: 10
+    min_order_amount_minor: 65000
+    availability: available
+    categories:
+      - extras

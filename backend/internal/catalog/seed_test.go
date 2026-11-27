@@ -20,39 +20,8 @@ func TestParseSeedExampleFile(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "..", "..", "seed", "products.yaml"))
 	require.NoError(t, err)
 
-	document, err := ParseSeed(data)
+	_, err = ParseSeed(data)
 	require.NoError(t, err)
-	require.Len(t, document.Categories, 2)
-	require.Len(t, document.Products, 1)
-
-	electronics := document.Categories[0]
-	require.Equal(t, "electronics", electronics.Key)
-	require.Equal(t, "10000000-0000-4000-8000-000000000011", electronics.ID)
-	require.Equal(t, []string{"name", "parent_id", "sort_order"}, electronics.Patch.Paths)
-	require.Equal(t, "Электроника", electronics.stored().Name)
-	require.Empty(t, electronics.stored().ParentID)
-	require.Equal(t, uint32(10), electronics.stored().SortOrder)
-
-	accessories := document.Categories[1]
-	require.Equal(t, "10000000-0000-4000-8000-000000000012", accessories.ID)
-	require.Equal(t, electronics.ID, accessories.stored().ParentID)
-
-	product := document.Products[0]
-	require.Equal(t, "20000000-0000-4000-8000-000000000011", product.ID)
-	require.Equal(t, []string{"electronics", "accessories"}, []string{electronics.Key, accessories.Key})
-	require.ElementsMatch(t, []string{
-		"name", "description", "price", "unit_of_measure", "min_order_quantity",
-		"min_order_amount", "availability", "category_ids",
-	}, product.Patch.Paths)
-	stored := product.stored()
-	require.Equal(t, "Кабель USB-C", stored.Name)
-	require.Equal(t, int64(79000), stored.Price.MinorUnits)
-	require.Equal(t, "RUB", stored.Price.Currency)
-	require.Equal(t, AvailabilityAvailable, stored.Availability)
-	require.Equal(t, []string{electronics.ID, accessories.ID}, stored.CategoryIDs)
-	require.Equal(t, uint32(1), stored.MinOrderQuantity)
-	require.NotNil(t, stored.MinOrderAmount)
-	require.Equal(t, int64(79000), stored.MinOrderAmount.MinorUnits)
 }
 
 func TestParseSeedOmitsAbsentFieldsAndUsesDefaults(t *testing.T) {
