@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"sort"
 	"sync"
@@ -184,6 +185,12 @@ func (r *memoryCatalogRepository) UpdateProduct(_ context.Context, productID str
 			product.Price = *patch.Price
 		case "availability":
 			product.Availability = patch.Availability
+		case "unit_of_measure":
+			product.UnitOfMeasure = patch.UnitOfMeasure
+		case "min_order_quantity":
+			product.MinOrderQuantity = patch.MinOrderQuantity
+		case "min_order_amount":
+			product.MinOrderAmount = patch.MinOrderAmount
 		case "category_ids":
 			for _, categoryID := range patch.CategoryIDs {
 				if _, exists := r.state.categories[categoryID]; !exists {
@@ -290,6 +297,179 @@ func (r *memoryCatalogRepository) DeleteCategory(_ context.Context, categoryID s
 	}
 	delete(r.state.categories, categoryID)
 	return nil
+}
+
+func (r *memoryCatalogRepository) ApplyImport(_ context.Context, doc *catalog.SeedDocument) (*catalog.ImportResult, error) {
+	if doc == nil {
+		return nil, fmt.Errorf("catalog import document is required")
+	}
+	r.state.mutex.Lock()
+	defer r.state.mutex.Unlock()
+	existingCategories := make(map[string]string, len(r.state.categories))
+	for id, category := range r.state.categories {
+		existingCategories[id] = category.ParentID
+	}
+	existingProducts := make(map[string]struct{}, len(r.state.products))
+	for id := range r.state.products {
+		existingProducts[id] = struct{}{}
+	}
+	if err := validateMemoryImport(doc, existingCategories, existingProducts); err != nil {
+		return nil, err
+	}
+	now := r.clock.Now()
+	result := &catalog.ImportResult{}
+	pending := append([]catalog.SeedCategory(nil), doc.Categories...)
+	for len(pending) > 0 {
+		next := make([]catalog.SeedCategory, 0)
+		created := false
+		for _, category := range pending {
+			if _, exists := existingCategories[category.ID]; exists {
+				created = true
+				continue
+			}
+			parent := ""
+			if memoryPatchHas(category.Patch.Paths, "parent_id") {
+				parent = category.Patch.ParentID
+			}
+			if parent != "" {
+				if _, exists := r.state.categories[parent]; !exists {
+					next = append(next, category)
+					continue
+				}
+			}
+			row := catalog.Category{ID: category.ID, Version: 1, CreatedAt: now, UpdatedAt: now}
+			applyCategoryPatch(&row, category.Patch)
+			r.state.categories[row.ID] = row
+			result.CreatedCategories++
+			created = true
+		}
+		if !created {
+			return nil, apperror.Validation("categories", "must not contain cycles")
+		}
+		pending = next
+	}
+	for _, category := range doc.Categories {
+		if _, exists := existingCategories[category.ID]; !exists || len(category.Patch.Paths) == 0 {
+			continue
+		}
+		row := r.state.categories[category.ID]
+		applyCategoryPatch(&row, category.Patch)
+		if row.ParentID != "" {
+			if _, exists := r.state.categories[row.ParentID]; !exists {
+				return nil, apperror.ErrPrecondition
+			}
+		}
+		row.Version++
+		row.UpdatedAt = now
+		r.state.categories[category.ID] = row
+		result.UpdatedCategories++
+	}
+	for _, product := range doc.Products {
+		if _, exists := existingProducts[product.ID]; exists {
+			if len(product.Patch.Paths) == 0 {
+				continue
+			}
+			row := r.state.products[product.ID]
+			if err := applyProductPatch(&row, product.Patch, r.state.categories); err != nil {
+				return nil, err
+			}
+			row.Version++
+			row.UpdatedAt = now
+			r.state.products[product.ID] = cloneProduct(row)
+			result.UpdatedProducts++
+			continue
+		}
+		row := catalog.Product{ID: product.ID, Version: 1, CreatedAt: now, UpdatedAt: now}
+		if err := applyProductPatch(&row, product.Patch, r.state.categories); err != nil {
+			return nil, err
+		}
+		r.state.products[row.ID] = cloneProduct(row)
+		result.CreatedProducts++
+	}
+	return result, nil
+}
+
+func validateMemoryImport(doc *catalog.SeedDocument, existingCategories map[string]string, existingProducts map[string]struct{}) error {
+	var errs []error
+	for index, category := range doc.Categories {
+		if _, exists := existingCategories[category.ID]; exists {
+			continue
+		}
+		if !memoryPatchHas(category.Patch.Paths, "name") || category.Patch.Name == "" {
+			errs = append(errs, apperror.Validation(fmt.Sprintf("categories[%d].name", index), "is required"))
+		}
+	}
+	for index, product := range doc.Products {
+		if _, exists := existingProducts[product.ID]; exists {
+			continue
+		}
+		path := fmt.Sprintf("products[%d]", index)
+		if !memoryPatchHas(product.Patch.Paths, "name") || product.Patch.Name == "" {
+			errs = append(errs, apperror.Validation(path+".name", "is required"))
+		}
+		if !memoryPatchHas(product.Patch.Paths, "price") || product.Patch.Price == nil {
+			errs = append(errs, apperror.Validation(path+".price_minor", "is required"))
+			errs = append(errs, apperror.Validation(path+".currency", "is required"))
+		}
+		if !memoryPatchHas(product.Patch.Paths, "availability") || product.Patch.Availability == "" {
+			errs = append(errs, apperror.Validation(path+".availability", "is required"))
+		}
+	}
+	return errors.Join(errs...)
+}
+
+func applyCategoryPatch(row *catalog.Category, patch catalog.CategoryPatch) {
+	for _, path := range patch.Paths {
+		switch path {
+		case "name":
+			row.Name = patch.Name
+		case "parent_id":
+			row.ParentID = patch.ParentID
+		case "sort_order":
+			row.SortOrder = patch.SortOrder
+		}
+	}
+}
+
+func applyProductPatch(row *catalog.Product, patch catalog.ProductPatch, categories map[string]catalog.Category) error {
+	for _, path := range patch.Paths {
+		switch path {
+		case "name":
+			row.Name = patch.Name
+		case "description":
+			row.Description = patch.Description
+		case "price":
+			if patch.Price == nil {
+				return apperror.Validation("price_minor", "is required")
+			}
+			row.Price = *patch.Price
+		case "availability":
+			row.Availability = patch.Availability
+		case "category_ids":
+			for _, categoryID := range patch.CategoryIDs {
+				if _, exists := categories[categoryID]; !exists {
+					return apperror.ErrPrecondition
+				}
+			}
+			row.CategoryIDs = append([]string(nil), patch.CategoryIDs...)
+		case "unit_of_measure":
+			row.UnitOfMeasure = patch.UnitOfMeasure
+		case "min_order_quantity":
+			row.MinOrderQuantity = patch.MinOrderQuantity
+		case "min_order_amount":
+			row.MinOrderAmount = patch.MinOrderAmount
+		}
+	}
+	return nil
+}
+
+func memoryPatchHas(paths []string, path string) bool {
+	for _, current := range paths {
+		if current == path {
+			return true
+		}
+	}
+	return false
 }
 
 type memoryCartRepository struct {
@@ -432,6 +612,9 @@ func (r *memoryCartRepository) cartViewLocked(record cartRecord) (*cart.Cart, er
 		storedItem.UnitPrice = product.Price
 		storedItem.LineTotal = lineTotal
 		storedItem.Availability = product.Availability
+		storedItem.UnitOfMeasure = product.UnitOfMeasure
+		storedItem.MinOrderQuantity = product.MinOrderQuantity
+		storedItem.MinOrderAmount = cloneMoney(product.MinOrderAmount)
 		result.Items = append(result.Items, storedItem)
 	}
 	result.Total = total
@@ -466,7 +649,16 @@ func matchesAvailability(value catalog.Availability, requested []catalog.Availab
 
 func cloneProduct(product catalog.Product) catalog.Product {
 	product.CategoryIDs = append([]string(nil), product.CategoryIDs...)
+	product.MinOrderAmount = cloneMoney(product.MinOrderAmount)
 	return product
+}
+
+func cloneMoney(amount *money.Money) *money.Money {
+	if amount == nil {
+		return nil
+	}
+	x := *amount
+	return &x
 }
 
 func sortProducts(products []catalog.Product) {

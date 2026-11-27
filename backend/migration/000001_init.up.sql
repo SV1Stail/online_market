@@ -36,6 +36,17 @@ CREATE TABLE products (
     -- Код валюты текущей цены товара в формате ISO 4217.
     currency_code VARCHAR(3) NOT NULL
         CHECK (currency_code ~ '^[A-Z]{3}$'),
+    -- Подпись одной ценовой единицы, например «шт» или «10 штук».
+    -- Пустая строка означает, что подписи нет.
+    unit_of_measure VARCHAR(64) NOT NULL DEFAULT '',
+    -- Минимальное количество ценовых единиц в одной позиции заказа.
+    -- 0 означает, что минимума нет.
+    min_order_quantity INTEGER NOT NULL DEFAULT 0
+        CHECK (min_order_quantity >= 0 AND min_order_quantity <= 10000),
+    -- Минимальная стоимость позиции в минимальных единицах валюты товара.
+    -- NULL означает, что минимума по сумме нет.
+    min_order_amount_minor_units BIGINT NULL
+        CHECK (min_order_amount_minor_units IS NULL OR min_order_amount_minor_units >= 1),
     -- Доступность товара: доступен, закончился или скрыт в архиве.
     availability VARCHAR(32) NOT NULL
         CHECK (availability IN ('available', 'out_of_stock', 'archived')),
@@ -82,69 +93,6 @@ CREATE TABLE product_categories (
 
 CREATE INDEX product_categories_category_idx
     ON product_categories (category_id, product_id);
-
--- Начальный каталог для демонстрации полного MVP-сценария после чистой
--- миграции. Фиксированные UUID делают данные воспроизводимыми во всех средах.
-INSERT INTO categories (id, name, parent_id, sort_order) VALUES
-    ('10000000-0000-4000-8000-000000000001', 'Электроника', NULL, 10),
-    ('10000000-0000-4000-8000-000000000002', 'Дом и быт', NULL, 20),
-    (
-        '10000000-0000-4000-8000-000000000003',
-        'Аксессуары',
-        '10000000-0000-4000-8000-000000000001',
-        10
-    );
-
-INSERT INTO products (
-    id,
-    name,
-    description,
-    price_minor_units,
-    currency_code,
-    availability
-) VALUES
-    (
-        '20000000-0000-4000-8000-000000000001',
-        'Беспроводные наушники',
-        'Компактные беспроводные наушники с зарядным футляром.',
-        599000,
-        'RUB',
-        'available'
-    ),
-    (
-        '20000000-0000-4000-8000-000000000002',
-        'Термокружка',
-        'Стальная термокружка объёмом 450 мл.',
-        149000,
-        'RUB',
-        'available'
-    ),
-    (
-        '20000000-0000-4000-8000-000000000003',
-        'Кабель USB-C',
-        'Кабель USB-C длиной 1 метр.',
-        79000,
-        'RUB',
-        'available'
-    );
-
-INSERT INTO product_categories (product_id, category_id) VALUES
-    (
-        '20000000-0000-4000-8000-000000000001',
-        '10000000-0000-4000-8000-000000000001'
-    ),
-    (
-        '20000000-0000-4000-8000-000000000001',
-        '10000000-0000-4000-8000-000000000003'
-    ),
-    (
-        '20000000-0000-4000-8000-000000000002',
-        '10000000-0000-4000-8000-000000000002'
-    ),
-    (
-        '20000000-0000-4000-8000-000000000003',
-        '10000000-0000-4000-8000-000000000003'
-    );
 
 CREATE TABLE carts (
     -- Уникальный идентификатор корзины, генерируемый приложением.
@@ -271,15 +219,17 @@ CREATE TABLE orders (
         CHECK (btrim(customer_phone) <> ''),
     -- Необязательный адрес электронной почты покупателя.
     customer_email VARCHAR(320) NOT NULL DEFAULT '',
-    -- Выбранный способ получения заказа: самовывоз или доставка курьером.
+    -- Способ получения заказа. Покупатель оформляет только доставку курьером.
     delivery_method VARCHAR(32) NOT NULL
-        CHECK (delivery_method IN ('pickup', 'courier')),
-    -- Город доставки; может быть пустым для самовывоза.
+        CHECK (delivery_method = 'courier'),
+    -- Город доставки.
     delivery_city VARCHAR(255) NOT NULL DEFAULT '',
-    -- Адрес доставки; может быть пустым для самовывоза.
+    -- Адрес доставки.
     delivery_address TEXT NOT NULL DEFAULT '',
     -- Уточнение покупателя по адресу или способу доставки.
     delivery_comment TEXT NOT NULL DEFAULT '',
+    -- День, в который покупатель ждёт доставку, по календарю магазина.
+    delivery_date DATE NOT NULL,
     -- Общий комментарий покупателя к заказу.
     customer_comment TEXT NOT NULL DEFAULT '',
     -- Внутренний комментарий сотрудников, не предназначенный для покупателя.
@@ -312,11 +262,8 @@ CREATE TABLE orders (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (id, currency_code),
     CHECK (
-        delivery_method = 'pickup'
-        OR (
-            btrim(delivery_city) <> ''
-            AND btrim(delivery_address) <> ''
-        )
+        btrim(delivery_city) <> ''
+        AND btrim(delivery_address) <> ''
     )
 );
 
@@ -329,6 +276,49 @@ CREATE INDEX orders_assigned_admin_created_idx
 
 CREATE INDEX orders_customer_phone_idx
     ON orders (customer_phone);
+
+-- Заказы, которые занимают слот доставки в выбранный день.
+CREATE INDEX orders_delivery_date_idx
+    ON orders (delivery_date)
+    WHERE status <> 'cancelled';
+
+CREATE INDEX orders_delivery_city_date_idx
+    ON orders (lower(btrim(delivery_city)), delivery_date)
+    WHERE status <> 'cancelled';
+
+-- Город или посёлок, в который магазин возит заказы.
+CREATE TABLE delivery_places (
+    id UUID PRIMARY KEY,
+    -- Название так, как его видит покупатель.
+    name VARCHAR(255) NOT NULL CHECK (btrim(name) <> ''),
+    -- Ключ для уникальности и поиска без учёта регистра и крайних пробелов.
+    name_key VARCHAR(255) NOT NULL UNIQUE CHECK (name_key <> ''),
+    -- Сколько адресов можно принять в один день. 0 закрывает место.
+    daily_limit INTEGER NOT NULL CHECK (daily_limit >= 0 AND daily_limit <= 10000),
+    -- all — каждый день, weekdays — понедельник–пятница, dates — только выбранные даты.
+    schedule_kind VARCHAR(16) NOT NULL
+        CHECK (schedule_kind IN ('all', 'weekdays', 'dates')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Конкретные дни доставки. Используются, когда schedule_kind = 'dates'.
+CREATE TABLE delivery_place_dates (
+    place_id UUID NOT NULL REFERENCES delivery_places (id) ON DELETE CASCADE,
+    delivery_date DATE NOT NULL,
+    PRIMARY KEY (place_id, delivery_date)
+);
+
+-- Отдельный лимит доставок на конкретный день.
+-- Оформление заказа считает места по городу, а не по этой таблице.
+CREATE TABLE delivery_day_limits (
+    -- День доставки по календарю магазина.
+    delivery_date DATE PRIMARY KEY,
+    -- Сколько адресов можно принять в этот день. 0 закрывает день.
+    delivery_limit INTEGER NOT NULL CHECK (delivery_limit >= 0),
+    -- Дата и время последнего изменения лимита.
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE order_items (
     -- Уникальный идентификатор позиции заказа.
@@ -350,6 +340,9 @@ CREATE TABLE order_items (
     -- Стоимость позиции: цена одной единицы, умноженная на количество.
     line_total_minor_units BIGINT NOT NULL
         CHECK (line_total_minor_units >= 0),
+    -- Снимок подписи ценовой единицы на момент добавления позиции.
+    -- Пустая строка означает, что подписи не было.
+    unit_of_measure VARCHAR(64) NOT NULL DEFAULT '',
     -- Дата и время добавления позиции в заказ.
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- Дата и время последнего изменения позиции заказа.

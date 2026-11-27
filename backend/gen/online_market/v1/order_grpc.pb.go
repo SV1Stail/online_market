@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	OrderService_CreateOrder_FullMethodName = "/online_market.api.v1.OrderService/CreateOrder"
-	OrderService_GetOrder_FullMethodName    = "/online_market.api.v1.OrderService/GetOrder"
+	OrderService_CreateOrder_FullMethodName        = "/online_market.api.v1.OrderService/CreateOrder"
+	OrderService_GetOrder_FullMethodName           = "/online_market.api.v1.OrderService/GetOrder"
+	OrderService_ListDeliveryPlaces_FullMethodName = "/online_market.api.v1.OrderService/ListDeliveryPlaces"
+	OrderService_ListDeliveryDays_FullMethodName   = "/online_market.api.v1.OrderService/ListDeliveryDays"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -29,6 +31,8 @@ const (
 type OrderServiceClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*CreateOrderResponse, error)
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*GetOrderResponse, error)
+	ListDeliveryPlaces(ctx context.Context, in *ListDeliveryPlacesRequest, opts ...grpc.CallOption) (*ListDeliveryPlacesResponse, error)
+	ListDeliveryDays(ctx context.Context, in *ListDeliveryDaysRequest, opts ...grpc.CallOption) (*ListDeliveryDaysResponse, error)
 }
 
 type orderServiceClient struct {
@@ -59,12 +63,34 @@ func (c *orderServiceClient) GetOrder(ctx context.Context, in *GetOrderRequest, 
 	return out, nil
 }
 
+func (c *orderServiceClient) ListDeliveryPlaces(ctx context.Context, in *ListDeliveryPlacesRequest, opts ...grpc.CallOption) (*ListDeliveryPlacesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveryPlacesResponse)
+	err := c.cc.Invoke(ctx, OrderService_ListDeliveryPlaces_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) ListDeliveryDays(ctx context.Context, in *ListDeliveryDaysRequest, opts ...grpc.CallOption) (*ListDeliveryDaysResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDeliveryDaysResponse)
+	err := c.cc.Invoke(ctx, OrderService_ListDeliveryDays_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
 type OrderServiceServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderResponse, error)
 	GetOrder(context.Context, *GetOrderRequest) (*GetOrderResponse, error)
+	ListDeliveryPlaces(context.Context, *ListDeliveryPlacesRequest) (*ListDeliveryPlacesResponse, error)
+	ListDeliveryDays(context.Context, *ListDeliveryDaysRequest) (*ListDeliveryDaysResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -80,6 +106,12 @@ func (UnimplementedOrderServiceServer) CreateOrder(context.Context, *CreateOrder
 }
 func (UnimplementedOrderServiceServer) GetOrder(context.Context, *GetOrderRequest) (*GetOrderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) ListDeliveryPlaces(context.Context, *ListDeliveryPlacesRequest) (*ListDeliveryPlacesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDeliveryPlaces not implemented")
+}
+func (UnimplementedOrderServiceServer) ListDeliveryDays(context.Context, *ListDeliveryDaysRequest) (*ListDeliveryDaysResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDeliveryDays not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 func (UnimplementedOrderServiceServer) testEmbeddedByValue()                      {}
@@ -138,6 +170,42 @@ func _OrderService_GetOrder_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_ListDeliveryPlaces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveryPlacesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).ListDeliveryPlaces(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_ListDeliveryPlaces_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).ListDeliveryPlaces(ctx, req.(*ListDeliveryPlacesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_ListDeliveryDays_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDeliveryDaysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).ListDeliveryDays(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_ListDeliveryDays_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).ListDeliveryDays(ctx, req.(*ListDeliveryDaysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +220,14 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOrder",
 			Handler:    _OrderService_GetOrder_Handler,
+		},
+		{
+			MethodName: "ListDeliveryPlaces",
+			Handler:    _OrderService_ListDeliveryPlaces_Handler,
+		},
+		{
+			MethodName: "ListDeliveryDays",
+			Handler:    _OrderService_ListDeliveryDays_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

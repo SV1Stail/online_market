@@ -22,6 +22,14 @@ func (s *checkoutRepositoryStub) GetPublic(context.Context, string, []byte) (*Or
 	return nil, nil
 }
 
+func (s *checkoutRepositoryStub) ListDeliveryPlaces(context.Context) ([]DeliveryPlace, error) {
+	return nil, nil
+}
+
+func (s *checkoutRepositoryStub) ListDeliveryDays(context.Context, string, time.Time, int) ([]DeliveryDay, error) {
+	return nil, nil
+}
+
 type fixedClock struct {
 	now time.Time
 }
@@ -63,6 +71,36 @@ func TestCreateUsesPersistedOrderIDForIdempotentToken(t *testing.T) {
 	require.NotEmpty(t, repository.command.RequestHash)
 }
 
+func TestCreateRejectsDeliveryDateOutsideWindow(t *testing.T) {
+	service := NewService(
+		&checkoutRepositoryStub{},
+		fixedClock{now: time.Date(2026, time.November, 13, 12, 0, 0, 0, time.UTC)},
+		fixedIDs{id: "11111111-1111-4111-8111-111111111111"},
+		visibleTokens{},
+		nil,
+	)
+	input := validCreateInput()
+	input.Delivery.Date = time.Date(2026, time.November, 12, 0, 0, 0, 0, time.UTC)
+
+	_, err := service.Create(context.Background(), input)
+	require.Error(t, err)
+}
+
+func TestCreateRejectsPickup(t *testing.T) {
+	service := NewService(
+		&checkoutRepositoryStub{},
+		fixedClock{},
+		fixedIDs{id: "11111111-1111-4111-8111-111111111111"},
+		visibleTokens{},
+		nil,
+	)
+	input := validCreateInput()
+	input.Delivery.Method = DeliveryPickup
+
+	_, err := service.Create(context.Background(), input)
+	require.Error(t, err)
+}
+
 func TestCreateRejectsCourierWithoutAddress(t *testing.T) {
 	service := NewService(
 		&checkoutRepositoryStub{},
@@ -83,7 +121,7 @@ func validCreateInput() CreateInput {
 		CartID:         "22222222-2222-4222-8222-222222222222",
 		CartToken:      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
 		Customer:       Customer{FullName: "Customer", Phone: "+70000000000", Email: "customer@example.com"},
-		Delivery:       Delivery{Method: DeliveryPickup},
+		Delivery:       Delivery{Method: DeliveryCourier, City: "Якутск", Address: "Ленина, 1", Date: time.Date(2026, time.November, 13, 0, 0, 0, 0, time.UTC)},
 		IdempotencyKey: "33333333-3333-4333-8333-333333333333",
 	}
 }

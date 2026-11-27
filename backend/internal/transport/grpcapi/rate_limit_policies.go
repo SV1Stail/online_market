@@ -27,6 +27,8 @@ func RateLimitPolicies() map[string]ratelimit.Policy {
 		marketv1.CartService_ClearCart_FullMethodName,
 	)
 	addPolicy(policies, "create_order", standardRules, marketv1.OrderService_CreateOrder_FullMethodName)
+	addPolicy(policies, "delivery_days", standardRules, marketv1.OrderService_ListDeliveryDays_FullMethodName)
+	addPolicy(policies, "delivery_places", standardRules, marketv1.OrderService_ListDeliveryPlaces_FullMethodName)
 	addPolicy(policies, "refresh_session", []ratelimit.Rule{
 		{Limit: 10, Window: time.Minute},
 	}, marketv1.AdminAuthService_RefreshSession_FullMethodName)

@@ -2,6 +2,7 @@ package grpcapi
 
 import (
 	"context"
+	"strings"
 
 	marketv1 "github.com/SV1Stail/online_market/gen/online_market/v1"
 	"github.com/SV1Stail/online_market/internal/apperror"
@@ -62,9 +63,15 @@ func (s *AdminCatalogServer) CreateProduct(ctx context.Context, request *marketv
 	if err != nil {
 		return nil, apperror.Validation("availability", "must be specified")
 	}
+	minOrderAmount, err := moneyFromProto(request.GetMinOrderAmount())
+	if err != nil {
+		return nil, apperror.Validation("min_order_amount", err.Error())
+	}
 	product, err := s.service.CreateProduct(ctx, catalog.ProductPatch{
 		Name: request.GetName(), Description: request.GetDescription(), Price: price,
 		Availability: availability, CategoryIDs: request.GetCategoryIds(),
+		UnitOfMeasure: request.GetUnitOfMeasure(), MinOrderQuantity: request.GetMinOrderQuantity(),
+		MinOrderAmount: minOrderAmount,
 	})
 	if err != nil {
 		return nil, err
@@ -80,6 +87,10 @@ func (s *AdminCatalogServer) UpdateProduct(ctx context.Context, request *marketv
 	if err != nil {
 		return nil, apperror.Validation("patch.price", err.Error())
 	}
+	minOrderAmount, err := moneyFromProto(request.GetPatch().GetMinOrderAmount())
+	if err != nil {
+		return nil, apperror.Validation("patch.min_order_amount", err.Error())
+	}
 	availability := catalog.Availability("")
 	if request.GetPatch().GetAvailability() != marketv1.ProductAvailability_PRODUCT_AVAILABILITY_UNSPECIFIED {
 		availability, err = availabilityFromProto(request.GetPatch().GetAvailability())
@@ -89,7 +100,9 @@ func (s *AdminCatalogServer) UpdateProduct(ctx context.Context, request *marketv
 	}
 	product, err := s.service.UpdateProduct(ctx, request.GetProductId(), request.GetExpectedVersion(), catalog.ProductPatch{
 		Name: request.GetPatch().GetName(), Description: request.GetPatch().GetDescription(), Price: price,
-		Availability: availability, CategoryIDs: request.GetPatch().GetCategoryIds(), Paths: maskPaths(request.GetUpdateMask()),
+		Availability: availability, CategoryIDs: request.GetPatch().GetCategoryIds(),
+		UnitOfMeasure: request.GetPatch().GetUnitOfMeasure(), MinOrderQuantity: request.GetPatch().GetMinOrderQuantity(),
+		MinOrderAmount: minOrderAmount, Paths: maskPaths(request.GetUpdateMask()),
 	})
 	if err != nil {
 		return nil, err
@@ -147,6 +160,22 @@ func (s *AdminCatalogServer) UpdateCategory(ctx context.Context, request *market
 		return nil, err
 	}
 	return &marketv1.UpdateCategoryResponse{Category: categoryToProto(*category)}, nil
+}
+
+func (s *AdminCatalogServer) ImportCatalog(ctx context.Context, request *marketv1.ImportCatalogRequest) (*marketv1.ImportCatalogResponse, error) {
+	if strings.TrimSpace(request.GetYaml()) == "" {
+		return nil, apperror.Validation("yaml", "is required")
+	}
+	result, err := s.service.ImportCatalog(ctx, []byte(request.GetYaml()))
+	if err != nil {
+		return nil, err
+	}
+	return &marketv1.ImportCatalogResponse{
+		CreatedCategories: uint32(result.CreatedCategories),
+		UpdatedCategories: uint32(result.UpdatedCategories),
+		CreatedProducts:   uint32(result.CreatedProducts),
+		UpdatedProducts:   uint32(result.UpdatedProducts),
+	}, nil
 }
 
 func (s *AdminCatalogServer) DeleteCategory(ctx context.Context, request *marketv1.DeleteCategoryRequest) (*marketv1.DeleteCategoryResponse, error) {

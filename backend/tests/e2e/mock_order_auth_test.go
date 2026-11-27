@@ -83,6 +83,9 @@ func (r *memoryOrderRepository) Create(_ context.Context, command order.Checkout
 		if multiplyErr != nil {
 			return nil, multiplyErr
 		}
+		if err := order.CheckLineMinimum(product.Name, cartItem.Quantity, lineTotal, product.MinOrderQuantity, product.MinOrderAmount); err != nil {
+			return nil, err
+		}
 		total, err = total.Add(lineTotal)
 		if err != nil {
 			return nil, err
@@ -90,7 +93,8 @@ func (r *memoryOrderRepository) Create(_ context.Context, command order.Checkout
 		items = append(items, order.Item{
 			ID: formatUUID(uint64(10_000 + index)), ProductID: product.ID, ProductName: product.Name,
 			UnitPrice: product.Price, Quantity: cartItem.Quantity, LineTotal: lineTotal,
-			CreatedAt: command.CreatedAt, UpdatedAt: command.CreatedAt,
+			UnitOfMeasure: product.UnitOfMeasure,
+			CreatedAt:     command.CreatedAt, UpdatedAt: command.CreatedAt,
 		})
 	}
 
@@ -113,6 +117,21 @@ func (r *memoryOrderRepository) Create(_ context.Context, command order.Checkout
 
 	result := cloneOrder(created)
 	return &result, nil
+}
+
+func (r *memoryOrderRepository) ListDeliveryPlaces(context.Context) ([]order.DeliveryPlace, error) {
+	return nil, nil
+}
+
+func (r *memoryOrderRepository) ListDeliveryDays(_ context.Context, _ string, from time.Time, days int) ([]order.DeliveryDay, error) {
+	if days <= 0 {
+		return nil, nil
+	}
+	result := make([]order.DeliveryDay, 0, days)
+	for index := 0; index < days; index++ {
+		result = append(result, order.DeliveryDay{Date: from.AddDate(0, 0, index), Limit: 20})
+	}
+	return result, nil
 }
 
 func (r *memoryOrderRepository) GetPublic(_ context.Context, number string, tokenHash []byte) (*order.Order, error) {
@@ -270,7 +289,8 @@ func (r *memoryAdminOrderRepository) AddItem(
 	item := order.Item{
 		ID: formatUUID(uint64(30_000 + len(stored.value.Items))), ProductID: product.ID,
 		ProductName: product.Name, UnitPrice: unitPrice, Quantity: quantity, LineTotal: lineTotal,
-		CreatedAt: r.clock.Now(), UpdatedAt: r.clock.Now(),
+		UnitOfMeasure: product.UnitOfMeasure,
+		CreatedAt:     r.clock.Now(), UpdatedAt: r.clock.Now(),
 	}
 	stored.value.Items = append(stored.value.Items, item)
 	if err := recalculateOrderTotal(&stored.value); err != nil {
@@ -383,6 +403,22 @@ func (r *memoryAdminOrderRepository) ChangeStatus(
 	return r.finishMutationLocked(stored, actorID, order.EventStatusChanged, comment, []order.FieldChange{
 		fieldChange("status", string(from), string(to)),
 	})
+}
+
+func (r *memoryAdminOrderRepository) SetDeliveryDayLimit(_ context.Context, date time.Time, limit int) (order.DeliveryDay, error) {
+	return order.DeliveryDay{Date: date, Limit: limit}, nil
+}
+
+func (r *memoryAdminOrderRepository) CreateDeliveryPlace(_ context.Context, place order.DeliveryPlace) (order.DeliveryPlace, error) {
+	return place, nil
+}
+
+func (r *memoryAdminOrderRepository) UpdateDeliveryPlace(_ context.Context, place order.DeliveryPlace) (order.DeliveryPlace, error) {
+	return place, nil
+}
+
+func (r *memoryAdminOrderRepository) DeleteDeliveryPlace(context.Context, string) error {
+	return nil
 }
 
 func (r *memoryAdminOrderRepository) ListEvents(

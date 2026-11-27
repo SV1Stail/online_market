@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/mail"
+	"regexp"
 	"strings"
 	"time"
 
@@ -31,6 +32,8 @@ type CheckoutCommand struct {
 type Repository interface {
 	Create(context.Context, CheckoutCommand) (*Order, error)
 	GetPublic(context.Context, string, []byte) (*Order, error)
+	ListDeliveryPlaces(context.Context) ([]DeliveryPlace, error)
+	ListDeliveryDays(context.Context, string, time.Time, int) ([]DeliveryDay, error)
 }
 
 type Clock interface {
@@ -79,7 +82,7 @@ func NewService(repository Repository, clock Clock, ids IDGenerator, tokens Toke
 
 func (s *Service) Create(ctx context.Context, input CreateInput) (*CreateResult, error) {
 	input = normalizeCreateInput(input)
-	if err := validateCreateInput(input); err != nil {
+	if err := validateCreateInput(input, s.clock.Now()); err != nil {
 		return nil, err
 	}
 	requestHash, err := checkoutHash(input)
@@ -117,6 +120,30 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*CreateResult,
 	return &CreateResult{Order: created, Token: orderToken}, nil
 }
 
+func (s *Service) ListDeliveryPlaces(ctx context.Context) ([]DeliveryPlace, error) {
+	places, err := s.repository.ListDeliveryPlaces(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list delivery places: %w", err)
+	}
+	return places, nil
+}
+
+func (s *Service) ListDeliveryDays(ctx context.Context, city string, from time.Time, days int) ([]DeliveryDay, error) {
+	city = strings.TrimSpace(city)
+	if city == "" || len(city) > 255 {
+		return nil, apperror.Validation("city", "is required")
+	}
+	from, days = normalizeDeliveryList(from, days, s.clock.Now())
+	if days == 0 {
+		return []DeliveryDay{}, nil
+	}
+	daysResult, err := s.repository.ListDeliveryDays(ctx, city, from, days)
+	if err != nil {
+		return nil, fmt.Errorf("list delivery days: %w", err)
+	}
+	return daysResult, nil
+}
+
 func (s *Service) Get(ctx context.Context, number, token string) (*Order, error) {
 	if strings.TrimSpace(number) == "" || len(number) > 64 {
 		return nil, apperror.Validation("order_number", "must contain between 1 and 64 characters")
@@ -144,7 +171,7 @@ func normalizeCreateInput(input CreateInput) CreateInput {
 	return input
 }
 
-func validateCreateInput(input CreateInput) error {
+func validateCreateInput(input CreateInput, now time.Time) error {
 	if !identifier.IsUUID(input.CartID) {
 		return apperror.Validation("cart_id", "must be a valid UUID")
 	}
@@ -163,6 +190,9 @@ func validateCreateInput(input CreateInput) error {
 	if err := validateDelivery(input.Delivery); err != nil {
 		return err
 	}
+	if err := validateCustomerDeliveryDate(input.Delivery.Date, now); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -173,8 +203,8 @@ func validateCustomer(customer Customer) error {
 	if customer.FullName == "" || len(customer.FullName) > 255 {
 		return apperror.Validation("customer.full_name", "must contain between 1 and 255 characters")
 	}
-	if customer.Phone == "" || len(customer.Phone) > 64 {
-		return apperror.Validation("customer.phone", "must contain between 1 and 64 characters")
+	if err := validatePhone(customer.Phone); err != nil {
+		return err
 	}
 	if customer.Email != "" {
 		if len(customer.Email) > 320 {
@@ -188,6 +218,21 @@ func validateCustomer(customer Customer) error {
 	return nil
 }
 
+var phoneCharacters = regexp.MustCompile(`^[0-9 +\-()]+$`)
+
+func validatePhone(phone string) error {
+	if phone == "" || len(phone) > 64 {
+		return apperror.Validation("customer.phone", "must contain between 1 and 64 characters")
+	}
+	if !phoneCharacters.MatchString(phone) {
+		return apperror.Validation("customer.phone", "contains unsupported characters")
+	}
+	if !strings.ContainsAny(phone, "0123456789") {
+		return apperror.Validation("customer.phone", "must contain a digit")
+	}
+	return nil
+}
+
 func validateDelivery(delivery Delivery) error {
 	delivery.City = strings.TrimSpace(delivery.City)
 	delivery.Address = strings.TrimSpace(delivery.Address)
@@ -197,14 +242,11 @@ func validateDelivery(delivery Delivery) error {
 	if len(delivery.Comment) > 4000 {
 		return apperror.Validation("delivery.comment", "must not exceed 4000 characters")
 	}
-	switch delivery.Method {
-	case DeliveryPickup:
-	case DeliveryCourier:
-		if delivery.City == "" || delivery.Address == "" {
-			return apperror.Validation("delivery", "city and address are required for courier delivery")
-		}
-	default:
-		return apperror.Validation("delivery.method", "unsupported delivery method")
+	if delivery.Method != DeliveryCourier {
+		return apperror.Validation("delivery.method", "only courier delivery is supported")
+	}
+	if delivery.City == "" || delivery.Address == "" {
+		return apperror.Validation("delivery", "city and address are required")
 	}
 	return nil
 }

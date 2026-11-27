@@ -37,6 +37,12 @@ message CartItem {
   uint32 quantity = 6;
   Money line_total = 7;
   ProductAvailability availability = 8;
+  // Current catalog label for one priced unit. Empty when the product has none.
+  string unit_of_measure = 9;
+  // Current catalog minimum quantity. Zero means the product has no minimum.
+  uint32 min_order_quantity = 10;
+  // Current catalog minimum line total. Absent means the product has no minimum amount.
+  Money min_order_amount = 11;
 }
 
 message Cart {

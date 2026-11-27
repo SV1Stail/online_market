@@ -45,6 +45,13 @@ message Product {
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
   uint64 version = 10;
+  // Free label for one priced unit, for example "шт" or "10 штук".
+  // Empty means the price is shown without a unit.
+  string unit_of_measure = 11;
+  // Minimum number of priced units in one order line. Zero means no minimum.
+  uint32 min_order_quantity = 12;
+  // Minimum line total for this product. Absent means no minimum amount.
+  Money min_order_amount = 13;
 }
 
 message ListProductsRequest {

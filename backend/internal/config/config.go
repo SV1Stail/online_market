@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"net/netip"
 	"os"
 	"strconv"
@@ -25,6 +26,9 @@ type Config struct {
 	TelegramBotToken         string
 	TelegramChatID           string
 	NotificationPollInterval time.Duration
+	DeliveryDailyLimit       int
+	MinOrderTotalMinor       int64
+	CatalogSeedFile          string
 }
 
 func Load() (*Config, error) {
@@ -74,6 +78,18 @@ func Load() (*Config, error) {
 			return nil, fmt.Errorf("TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are required for telegram notifications")
 		}
 	}
+	deliveryDailyLimit, err := IntEnv("DELIVERY_DAILY_LIMIT", 20)
+	if err != nil {
+		return nil, err
+	}
+	minOrderRubles, err := IntEnv("MIN_ORDER_TOTAL_RUB", 3000)
+	if err != nil {
+		return nil, err
+	}
+	minOrderTotalMinor, err := rublesToMinor(minOrderRubles)
+	if err != nil {
+		return nil, err
+	}
 	tlsCertificateFile := strings.TrimSpace(os.Getenv("TLS_CERT_FILE"))
 	tlsPrivateKeyFile := strings.TrimSpace(os.Getenv("TLS_KEY_FILE"))
 	if (tlsCertificateFile == "") != (tlsPrivateKeyFile == "") {
@@ -96,7 +112,17 @@ func Load() (*Config, error) {
 		TelegramBotToken:         strings.TrimSpace(os.Getenv("TELEGRAM_BOT_TOKEN")),
 		TelegramChatID:           strings.TrimSpace(os.Getenv("TELEGRAM_CHAT_ID")),
 		NotificationPollInterval: pollInterval,
+		DeliveryDailyLimit:       deliveryDailyLimit,
+		MinOrderTotalMinor:       minOrderTotalMinor,
+		CatalogSeedFile:          strings.TrimSpace(os.Getenv("CATALOG_SEED_FILE")),
 	}, nil
+}
+
+func rublesToMinor(rubles int) (int64, error) {
+	if rubles <= 0 || int64(rubles) > math.MaxInt64/100 {
+		return 0, fmt.Errorf("MIN_ORDER_TOTAL_RUB must be a positive whole number of rubles")
+	}
+	return int64(rubles) * 100, nil
 }
 
 func prefixes(name, raw string) ([]netip.Prefix, error) {

@@ -29,6 +29,7 @@ const (
 	AdminCatalogService_CreateCategory_FullMethodName = "/online_market.api.v1.AdminCatalogService/CreateCategory"
 	AdminCatalogService_UpdateCategory_FullMethodName = "/online_market.api.v1.AdminCatalogService/UpdateCategory"
 	AdminCatalogService_DeleteCategory_FullMethodName = "/online_market.api.v1.AdminCatalogService/DeleteCategory"
+	AdminCatalogService_ImportCatalog_FullMethodName  = "/online_market.api.v1.AdminCatalogService/ImportCatalog"
 )
 
 // AdminCatalogServiceClient is the client API for AdminCatalogService service.
@@ -46,6 +47,8 @@ type AdminCatalogServiceClient interface {
 	CreateCategory(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*CreateCategoryResponse, error)
 	UpdateCategory(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*UpdateCategoryResponse, error)
 	DeleteCategory(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*DeleteCategoryResponse, error)
+	// Creates missing categories and products and updates only fields present in the YAML file.
+	ImportCatalog(ctx context.Context, in *ImportCatalogRequest, opts ...grpc.CallOption) (*ImportCatalogResponse, error)
 }
 
 type adminCatalogServiceClient struct {
@@ -156,6 +159,16 @@ func (c *adminCatalogServiceClient) DeleteCategory(ctx context.Context, in *Dele
 	return out, nil
 }
 
+func (c *adminCatalogServiceClient) ImportCatalog(ctx context.Context, in *ImportCatalogRequest, opts ...grpc.CallOption) (*ImportCatalogResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ImportCatalogResponse)
+	err := c.cc.Invoke(ctx, AdminCatalogService_ImportCatalog_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminCatalogServiceServer is the server API for AdminCatalogService service.
 // All implementations must embed UnimplementedAdminCatalogServiceServer
 // for forward compatibility.
@@ -171,6 +184,8 @@ type AdminCatalogServiceServer interface {
 	CreateCategory(context.Context, *CreateCategoryRequest) (*CreateCategoryResponse, error)
 	UpdateCategory(context.Context, *UpdateCategoryRequest) (*UpdateCategoryResponse, error)
 	DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error)
+	// Creates missing categories and products and updates only fields present in the YAML file.
+	ImportCatalog(context.Context, *ImportCatalogRequest) (*ImportCatalogResponse, error)
 	mustEmbedUnimplementedAdminCatalogServiceServer()
 }
 
@@ -210,6 +225,9 @@ func (UnimplementedAdminCatalogServiceServer) UpdateCategory(context.Context, *U
 }
 func (UnimplementedAdminCatalogServiceServer) DeleteCategory(context.Context, *DeleteCategoryRequest) (*DeleteCategoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteCategory not implemented")
+}
+func (UnimplementedAdminCatalogServiceServer) ImportCatalog(context.Context, *ImportCatalogRequest) (*ImportCatalogResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ImportCatalog not implemented")
 }
 func (UnimplementedAdminCatalogServiceServer) mustEmbedUnimplementedAdminCatalogServiceServer() {}
 func (UnimplementedAdminCatalogServiceServer) testEmbeddedByValue()                             {}
@@ -412,6 +430,24 @@ func _AdminCatalogService_DeleteCategory_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminCatalogService_ImportCatalog_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportCatalogRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCatalogServiceServer).ImportCatalog(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminCatalogService_ImportCatalog_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCatalogServiceServer).ImportCatalog(ctx, req.(*ImportCatalogRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminCatalogService_ServiceDesc is the grpc.ServiceDesc for AdminCatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -458,6 +494,10 @@ var AdminCatalogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCategory",
 			Handler:    _AdminCatalogService_DeleteCategory_Handler,
+		},
+		{
+			MethodName: "ImportCatalog",
+			Handler:    _AdminCatalogService_ImportCatalog_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

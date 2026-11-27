@@ -16,13 +16,16 @@ const (
 )
 
 type Item struct {
-	ID           string
-	ProductID    string
-	ProductName  string
-	UnitPrice    money.Money
-	Quantity     uint32
-	LineTotal    money.Money
-	Availability catalog.Availability
+	ID               string
+	ProductID        string
+	ProductName      string
+	UnitPrice        money.Money
+	Quantity         uint32
+	LineTotal        money.Money
+	Availability     catalog.Availability
+	UnitOfMeasure    string
+	MinOrderQuantity uint32
+	MinOrderAmount   *money.Money
 }
 
 type Cart struct {

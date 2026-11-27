@@ -37,17 +37,19 @@ type Delivery struct {
 	City    string
 	Address string
 	Comment string
+	Date    time.Time
 }
 
 type Item struct {
-	ID          string
-	ProductID   string
-	ProductName string
-	UnitPrice   money.Money
-	Quantity    uint32
-	LineTotal   money.Money
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID            string
+	ProductID     string
+	ProductName   string
+	UnitPrice     money.Money
+	Quantity      uint32
+	LineTotal     money.Money
+	UnitOfMeasure string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type Order struct {

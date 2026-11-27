@@ -22,6 +22,12 @@ The API reads configuration from environment variables.
 - `ACCESS_TOKEN_TTL` — administrator access token lifetime, default `15m`.
 - `REFRESH_TOKEN_TTL` — refresh token lifetime, default `720h`.
 - `CART_TTL` — anonymous cart lifetime, default `168h`.
+- `DELIVERY_DAILY_LIMIT` — how many deliveries a calendar day accepts when
+  that day has no saved limit, default `20`. A positive integer. An
+  administrator can replace it for a single day.
+- `MIN_ORDER_TOTAL_RUB` — the smallest order total a customer can place,
+  in whole rubles, default `3000`. A positive integer. Product minimums
+  still apply on top of this total.
 - `NOTIFICATION_CHANNELS` — comma-separated channels. MVP supports `telegram`.
 - `NOTIFICATION_POLL_INTERVAL` — outbox polling interval, default `2s`.
 - `TRUSTED_PROXY_CIDRS` — optional comma-separated proxy networks. The API
@@ -30,6 +36,11 @@ The API reads configuration from environment variables.
   Without this setting rate limits use the direct peer IP.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` — required when the `telegram`
   channel is enabled.
+- `CATALOG_SEED_FILE` — optional path of a catalog YAML file. When it is set
+  and both `categories` and `products` are empty, the API inserts that file
+  once during startup. A restart with any catalog row leaves the database
+  unchanged. An empty value disables seeding. Local Compose mounts
+  `backend/seed/products.yaml` at `/seed/products.yaml`.
 
 ## Initial setup
 
@@ -42,9 +53,9 @@ make -C backend migrate-up DATABASE_URL='postgres://...'
 Create the first administrator without putting the password in command history:
 
 ```shell
-export DATABASE_URL='postgres://...'
+export DATABASE_URL='postgres://online_market:postgres@127.0.0.1:5432/online_market?sslmode=disable'
 export ADMIN_LOGIN='admin'
-export ADMIN_PASSWORD='use-a-long-random-password'
+export ADMIN_PASSWORD='admin_password'
 export ADMIN_DISPLAY_NAME='Administrator'
 export ADMIN_ROLES='admin'
 make -C backend admin-create
@@ -72,9 +83,9 @@ The standard gRPC health service is registered on the same listener.
 ## HTTP/JSON gateway
 
 The HTTP/JSON edge lives in the separate `online_market_gateway` repository.
-This repository keeps protobuf contracts, HTTP mappings and generated
-`*.pb.gw.go` stubs. A separate `contracts/` Go module publishes generated
-stubs for the gateway while `.proto` sources stay here.
+This repository keeps protobuf contracts, HTTP mappings and the only generated
+Go stubs, in `backend/gen`. The gateway builds from a vendor snapshot of that
+package and does not generate a second copy.
 
 Compose in `build/` starts PostgreSQL, Redis, migrations, the API and grpc-ui.
 The sibling `online_market_gateway` repository has its own Compose project;
@@ -126,4 +137,9 @@ make backend-local-logs
 make backend-local-ps
 make backend-local-down
 ```
+
+`make backend-local-down` removes the local Postgres volume together with the
+containers. The next `make backend-local-up` creates an empty database and
+applies the current migration. Gateway and web `local-down` do not own that
+volume.
 

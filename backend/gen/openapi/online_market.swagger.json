@@ -137,6 +137,44 @@
         ]
       }
     },
+    "/api/v1/admin/catalog:import": {
+      "post": {
+        "summary": "Creates missing categories and products and updates only fields present in the YAML file.",
+        "operationId": "AdminCatalogService_ImportCatalog",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ImportCatalogResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ImportCatalogRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AdminCatalogService"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/admin/categories": {
       "get": {
         "operationId": "AdminCatalogService_ListCategories",
@@ -312,6 +350,136 @@
           {
             "BearerAuth": []
           }
+        ]
+      }
+    },
+    "/api/v1/admin/delivery-days": {
+      "post": {
+        "operationId": "AdminOrderService_SetDeliveryDayLimit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SetDeliveryDayLimitResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SetDeliveryDayLimitRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AdminOrderService"
+        ]
+      }
+    },
+    "/api/v1/admin/delivery-places": {
+      "post": {
+        "operationId": "AdminOrderService_CreateDeliveryPlace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateDeliveryPlaceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateDeliveryPlaceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AdminOrderService"
+        ]
+      }
+    },
+    "/api/v1/admin/delivery-places/{placeId}": {
+      "delete": {
+        "operationId": "AdminOrderService_DeleteDeliveryPlace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteDeliveryPlaceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "placeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AdminOrderService"
+        ]
+      },
+      "patch": {
+        "operationId": "AdminOrderService_UpdateDeliveryPlace",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateDeliveryPlaceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "placeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminOrderServiceUpdateDeliveryPlaceBody"
+            }
+          }
+        ],
+        "tags": [
+          "AdminOrderService"
         ]
       }
     },
@@ -1190,6 +1358,74 @@
         ]
       }
     },
+    "/api/v1/delivery-days": {
+      "get": {
+        "operationId": "OrderService_ListDeliveryDays",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListDeliveryDaysResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fromDate",
+            "description": "Inclusive first day, YYYY-MM-DD. Empty starts at the shop's current day.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "description": "Number of days to return. Zero uses the server horizon.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "city",
+            "description": "City or settlement the customer wants delivery to.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "OrderService"
+        ]
+      }
+    },
+    "/api/v1/delivery-places": {
+      "get": {
+        "operationId": "OrderService_ListDeliveryPlaces",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListDeliveryPlacesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "OrderService"
+        ]
+      }
+    },
     "/api/v1/orders": {
       "post": {
         "operationId": "OrderService_CreateOrder",
@@ -1407,6 +1643,27 @@
         "expectedVersion": {
           "type": "string",
           "format": "uint64"
+        }
+      }
+    },
+    "AdminOrderServiceUpdateDeliveryPlaceBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dailyLimit": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "scheduleKind": {
+          "$ref": "#/definitions/v1DeliveryScheduleKind"
+        },
+        "dates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -1675,6 +1932,19 @@
         },
         "availability": {
           "$ref": "#/definitions/v1ProductAvailability"
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "Current catalog label for one priced unit. Empty when the product has none."
+        },
+        "minOrderQuantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Current catalog minimum quantity. Zero means the product has no minimum."
+        },
+        "minOrderAmount": {
+          "$ref": "#/definitions/v1Money",
+          "description": "Current catalog minimum line total. Absent means the product has no minimum amount."
         }
       }
     },
@@ -1793,6 +2063,35 @@
         }
       }
     },
+    "v1CreateDeliveryPlaceRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dailyLimit": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "scheduleKind": {
+          "$ref": "#/definitions/v1DeliveryScheduleKind"
+        },
+        "dates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1CreateDeliveryPlaceResponse": {
+      "type": "object",
+      "properties": {
+        "place": {
+          "$ref": "#/definitions/v1DeliveryPlace"
+        }
+      }
+    },
     "v1CreateOrderRequest": {
       "type": "object",
       "properties": {
@@ -1849,6 +2148,19 @@
           "items": {
             "type": "string"
           }
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "Empty means the price has no unit label."
+        },
+        "minOrderQuantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Zero means this product has no minimum quantity."
+        },
+        "minOrderAmount": {
+          "$ref": "#/definitions/v1Money",
+          "description": "Absent or a zero amount means this product has no minimum line total."
         }
       }
     },
@@ -1877,6 +2189,9 @@
     "v1DeleteCategoryResponse": {
       "type": "object"
     },
+    "v1DeleteDeliveryPlaceResponse": {
+      "type": "object"
+    },
     "v1DeleteProductResponse": {
       "type": "object",
       "properties": {
@@ -1884,6 +2199,28 @@
           "$ref": "#/definitions/v1Product"
         }
       }
+    },
+    "v1DeliveryDay": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "booked": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "deliveryLimit": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "remaining": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Slots still open. Zero means the day cannot accept another delivery."
+        }
+      },
+      "description": "DeliveryDay is one shop calendar day and its delivery capacity."
     },
     "v1DeliveryDetails": {
       "type": "object",
@@ -1899,6 +2236,10 @@
         },
         "comment": {
           "type": "string"
+        },
+        "deliveryDate": {
+          "type": "string",
+          "description": "Calendar day the customer expects delivery, YYYY-MM-DD in the shop calendar."
         }
       }
     },
@@ -1910,6 +2251,42 @@
         "DELIVERY_METHOD_COURIER"
       ],
       "default": "DELIVERY_METHOD_UNSPECIFIED"
+    },
+    "v1DeliveryPlace": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "dailyLimit": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "scheduleKind": {
+          "$ref": "#/definitions/v1DeliveryScheduleKind"
+        },
+        "dates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "YYYY-MM-DD. Used when schedule_kind is DATES."
+        }
+      }
+    },
+    "v1DeliveryScheduleKind": {
+      "type": "string",
+      "enum": [
+        "DELIVERY_SCHEDULE_KIND_UNSPECIFIED",
+        "DELIVERY_SCHEDULE_KIND_ALL",
+        "DELIVERY_SCHEDULE_KIND_WEEKDAYS",
+        "DELIVERY_SCHEDULE_KIND_DATES"
+      ],
+      "default": "DELIVERY_SCHEDULE_KIND_UNSPECIFIED",
+      "description": " - DELIVERY_SCHEDULE_KIND_ALL: Every day in the shop horizon.\n - DELIVERY_SCHEDULE_KIND_WEEKDAYS: Monday through Friday in the shop calendar.\n - DELIVERY_SCHEDULE_KIND_DATES: Only the dates listed on the place."
     },
     "v1GetAdminCategoryResponse": {
       "type": "object",
@@ -1970,6 +2347,36 @@
         }
       }
     },
+    "v1ImportCatalogRequest": {
+      "type": "object",
+      "properties": {
+        "yaml": {
+          "type": "string",
+          "description": "Catalog document in the seed YAML format. At most 1 MiB."
+        }
+      }
+    },
+    "v1ImportCatalogResponse": {
+      "type": "object",
+      "properties": {
+        "createdCategories": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "updatedCategories": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "createdProducts": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "updatedProducts": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
     "v1ListAdminCategoriesResponse": {
       "type": "object",
       "properties": {
@@ -2020,6 +2427,30 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Category"
+          }
+        }
+      }
+    },
+    "v1ListDeliveryDaysResponse": {
+      "type": "object",
+      "properties": {
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1DeliveryDay"
+          }
+        }
+      }
+    },
+    "v1ListDeliveryPlacesResponse": {
+      "type": "object",
+      "properties": {
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1DeliveryPlace"
           }
         }
       }
@@ -2262,9 +2693,13 @@
         },
         "lineTotal": {
           "$ref": "#/definitions/v1Money"
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "Unit label copied from the catalog when the line was added. Empty if none."
         }
       },
-      "description": "OrderItem is a snapshot. Its name and price do not change when the catalog\nproduct is edited later."
+      "description": "OrderItem is a snapshot. Its name, price, and unit label do not change when\nthe catalog product is edited later."
     },
     "v1OrderItemPatch": {
       "type": "object",
@@ -2376,6 +2811,19 @@
         "version": {
           "type": "string",
           "format": "uint64"
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "Free label for one priced unit, for example \"шт\" or \"10 штук\".\nEmpty means the price is shown without a unit."
+        },
+        "minOrderQuantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Minimum number of priced units in one order line. Zero means no minimum."
+        },
+        "minOrderAmount": {
+          "$ref": "#/definitions/v1Money",
+          "description": "Minimum line total for this product. Absent means no minimum amount."
         }
       }
     },
@@ -2409,6 +2857,19 @@
           "items": {
             "type": "string"
           }
+        },
+        "unitOfMeasure": {
+          "type": "string",
+          "description": "Empty clears the unit label when unit_of_measure is in the update mask."
+        },
+        "minOrderQuantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Zero clears the minimum quantity when min_order_quantity is in the update mask."
+        },
+        "minOrderAmount": {
+          "$ref": "#/definitions/v1Money",
+          "description": "Absent or a zero amount clears the minimum line total when min_order_amount is in the update mask."
         }
       }
     },
@@ -2455,6 +2916,27 @@
         }
       }
     },
+    "v1SetDeliveryDayLimitRequest": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "deliveryLimit": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Zero closes the day. The configured default applies only when a day has no saved limit."
+        }
+      }
+    },
+    "v1SetDeliveryDayLimitResponse": {
+      "type": "object",
+      "properties": {
+        "day": {
+          "$ref": "#/definitions/v1DeliveryDay"
+        }
+      }
+    },
     "v1UpdateCartItemResponse": {
       "type": "object",
       "properties": {
@@ -2468,6 +2950,14 @@
       "properties": {
         "category": {
           "$ref": "#/definitions/v1Category"
+        }
+      }
+    },
+    "v1UpdateDeliveryPlaceResponse": {
+      "type": "object",
+      "properties": {
+        "place": {
+          "$ref": "#/definitions/v1DeliveryPlace"
         }
       }
     },

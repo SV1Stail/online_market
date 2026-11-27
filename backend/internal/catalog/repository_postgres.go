@@ -39,6 +39,9 @@ func (r *PostgresRepository) ListProducts(ctx context.Context, filter ListFilter
 			p.description,
 			p.price_minor_units,
 			p.currency_code,
+			p.unit_of_measure,
+			p.min_order_quantity,
+			p.min_order_amount_minor_units,
 			p.availability,
 			p.version,
 			p.created_at,
@@ -97,6 +100,9 @@ func (r *PostgresRepository) GetProduct(ctx context.Context, productID string) (
 			p.description,
 			p.price_minor_units,
 			p.currency_code,
+			p.unit_of_measure,
+			p.min_order_quantity,
+			p.min_order_amount_minor_units,
 			p.availability,
 			p.version,
 			p.created_at,
@@ -175,12 +181,17 @@ func scanProduct(scanner productScanner) (*Product, error) {
 	var product Product
 	var minorUnits int64
 	var currency string
+	var minQuantity int32
+	var minAmount sql.NullInt64
 	if err := scanner.Scan(
 		&product.ID,
 		&product.Name,
 		&product.Description,
 		&minorUnits,
 		&currency,
+		&product.UnitOfMeasure,
+		&minQuantity,
+		&minAmount,
 		&product.Availability,
 		&product.Version,
 		&product.CreatedAt,
@@ -194,5 +205,16 @@ func scanProduct(scanner productScanner) (*Product, error) {
 		return nil, fmt.Errorf("invalid stored product price: %w", err)
 	}
 	product.Price = price
+	if minQuantity < 0 {
+		return nil, fmt.Errorf("invalid stored minimum order quantity")
+	}
+	product.MinOrderQuantity = uint32(minQuantity)
+	if minAmount.Valid {
+		amount, err := money.New(minAmount.Int64, currency)
+		if err != nil {
+			return nil, fmt.Errorf("invalid stored minimum order amount: %w", err)
+		}
+		product.MinOrderAmount = &amount
+	}
 	return &product, nil
 }

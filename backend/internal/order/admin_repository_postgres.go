@@ -107,11 +107,19 @@ func (r *PostgresRepository) UpdateDetails(
 			`, orderID, strings.TrimSpace(patch.Customer.FullName), strings.TrimSpace(patch.Customer.Phone), strings.TrimSpace(patch.Customer.Email))
 			changes = append(changes, change(path, customerString(mutation.current.Customer), customerString(patch.Customer)))
 		case "delivery":
+			cityChanged := PlaceKey(mutation.current.Delivery.City) != PlaceKey(patch.Delivery.City)
+			dateChanged := !SameDeliveryDate(mutation.current.Delivery.Date, patch.Delivery.Date)
+			if mutation.current.Status != StatusCancelled && (cityChanged || dateChanged) {
+				if err = r.reserveDeliverySlot(ctx, mutation.tx, patch.Delivery.City, patch.Delivery.Date); err != nil {
+					return nil, err
+				}
+			}
 			_, err = mutation.tx.Exec(ctx, `
 				UPDATE orders
-				SET delivery_method = $2, delivery_city = $3, delivery_address = $4, delivery_comment = $5
+				SET delivery_method = $2, delivery_city = $3, delivery_address = $4,
+					delivery_comment = $5, delivery_date = $6::date
 				WHERE id = $1::uuid
-			`, orderID, patch.Delivery.Method, strings.TrimSpace(patch.Delivery.City), strings.TrimSpace(patch.Delivery.Address), strings.TrimSpace(patch.Delivery.Comment))
+			`, orderID, patch.Delivery.Method, strings.TrimSpace(patch.Delivery.City), strings.TrimSpace(patch.Delivery.Address), strings.TrimSpace(patch.Delivery.Comment), FormatDeliveryDate(patch.Delivery.Date))
 			changes = append(changes, change(path, deliveryString(mutation.current.Delivery), deliveryString(patch.Delivery)))
 		case "customer_comment":
 			_, err = mutation.tx.Exec(ctx, `UPDATE orders SET customer_comment = $2 WHERE id = $1::uuid`, orderID, patch.CustomerComment)
@@ -149,10 +157,11 @@ func (r *PostgresRepository) AddItem(
 	var minorUnits int64
 	var currency string
 	var availability catalog.Availability
+	var unitOfMeasure string
 	err = mutation.tx.QueryRow(ctx, `
-		SELECT name, price_minor_units, currency_code, availability
+		SELECT name, price_minor_units, currency_code, availability, unit_of_measure
 		FROM products WHERE id = $1::uuid
-	`, productID).Scan(&productName, &minorUnits, &currency, &availability)
+	`, productID).Scan(&productName, &minorUnits, &currency, &availability, &unitOfMeasure)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, apperror.ErrNotFound
 	}
@@ -183,9 +192,9 @@ func (r *PostgresRepository) AddItem(
 	_, err = mutation.tx.Exec(ctx, `
 		INSERT INTO order_items (
 			id, order_id, product_id, product_name, unit_price_minor_units,
-			currency_code, quantity, line_total_minor_units
-		) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8)
-	`, itemID, orderID, productID, productName, unitPrice.MinorUnits, unitPrice.Currency, quantity, lineTotal.MinorUnits)
+			currency_code, quantity, line_total_minor_units, unit_of_measure
+		) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9)
+	`, itemID, orderID, productID, productName, unitPrice.MinorUnits, unitPrice.Currency, quantity, lineTotal.MinorUnits, unitOfMeasure)
 	if err != nil {
 		return nil, fmt.Errorf("insert admin order item: %w", err)
 	}
@@ -501,7 +510,7 @@ func customerString(value Customer) string {
 }
 
 func deliveryString(value Delivery) string {
-	return strings.Join([]string{string(value.Method), value.City, value.Address, value.Comment}, " | ")
+	return strings.Join([]string{string(value.Method), value.City, value.Address, value.Comment, FormatDeliveryDate(value.Date)}, " | ")
 }
 
 func moneyString(value money.Money) string {

@@ -167,18 +167,25 @@ func (x *Category) GetUpdatedAt() *timestamppb.Timestamp {
 }
 
 type Product struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Price         *Money                 `protobuf:"bytes,4,opt,name=price,proto3" json:"price,omitempty"`
-	Availability  ProductAvailability    `protobuf:"varint,5,opt,name=availability,proto3,enum=online_market.api.v1.ProductAvailability" json:"availability,omitempty"`
-	CategoryIds   []string               `protobuf:"bytes,7,rep,name=category_ids,json=categoryIds,proto3" json:"category_ids,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	Version       uint64                 `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Id           string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name         string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description  string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Price        *Money                 `protobuf:"bytes,4,opt,name=price,proto3" json:"price,omitempty"`
+	Availability ProductAvailability    `protobuf:"varint,5,opt,name=availability,proto3,enum=online_market.api.v1.ProductAvailability" json:"availability,omitempty"`
+	CategoryIds  []string               `protobuf:"bytes,7,rep,name=category_ids,json=categoryIds,proto3" json:"category_ids,omitempty"`
+	CreatedAt    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Version      uint64                 `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
+	// Free label for one priced unit, for example "шт" or "10 штук".
+	// Empty means the price is shown without a unit.
+	UnitOfMeasure string `protobuf:"bytes,11,opt,name=unit_of_measure,json=unitOfMeasure,proto3" json:"unit_of_measure,omitempty"`
+	// Minimum number of priced units in one order line. Zero means no minimum.
+	MinOrderQuantity uint32 `protobuf:"varint,12,opt,name=min_order_quantity,json=minOrderQuantity,proto3" json:"min_order_quantity,omitempty"`
+	// Minimum line total for this product. Absent means no minimum amount.
+	MinOrderAmount *Money `protobuf:"bytes,13,opt,name=min_order_amount,json=minOrderAmount,proto3" json:"min_order_amount,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Product) Reset() {
@@ -272,6 +279,27 @@ func (x *Product) GetVersion() uint64 {
 		return x.Version
 	}
 	return 0
+}
+
+func (x *Product) GetUnitOfMeasure() string {
+	if x != nil {
+		return x.UnitOfMeasure
+	}
+	return ""
+}
+
+func (x *Product) GetMinOrderQuantity() uint32 {
+	if x != nil {
+		return x.MinOrderQuantity
+	}
+	return 0
+}
+
+func (x *Product) GetMinOrderAmount() *Money {
+	if x != nil {
+		return x.MinOrderAmount
+	}
+	return nil
 }
 
 type ListProductsRequest struct {
@@ -577,7 +605,7 @@ const file_online_market_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x92\x03\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xaf\x04\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -590,7 +618,10 @@ const file_online_market_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\x18\n" +
 	"\aversion\x18\n" +
-	" \x01(\x04R\aversionJ\x04\b\x06\x10\aR\x06images\"\xac\x01\n" +
+	" \x01(\x04R\aversion\x12&\n" +
+	"\x0funit_of_measure\x18\v \x01(\tR\runitOfMeasure\x12,\n" +
+	"\x12min_order_quantity\x18\f \x01(\rR\x10minOrderQuantity\x12E\n" +
+	"\x10min_order_amount\x18\r \x01(\v2\x1b.online_market.api.v1.MoneyR\x0eminOrderAmountJ\x04\b\x06\x10\aR\x06images\"\xac\x01\n" +
 	"\x13ListProductsRequest\x12!\n" +
 	"\fcategory_ids\x18\x01 \x03(\tR\vcategoryIds\x12\x14\n" +
 	"\x05query\x18\x02 \x01(\tR\x05query\x12%\n" +
@@ -656,22 +687,23 @@ var file_online_market_v1_catalog_proto_depIdxs = []int32{
 	0,  // 3: online_market.api.v1.Product.availability:type_name -> online_market.api.v1.ProductAvailability
 	9,  // 4: online_market.api.v1.Product.created_at:type_name -> google.protobuf.Timestamp
 	9,  // 5: online_market.api.v1.Product.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 6: online_market.api.v1.ListProductsRequest.page:type_name -> online_market.api.v1.PageRequest
-	2,  // 7: online_market.api.v1.ListProductsResponse.products:type_name -> online_market.api.v1.Product
-	12, // 8: online_market.api.v1.ListProductsResponse.page:type_name -> online_market.api.v1.PageResponse
-	2,  // 9: online_market.api.v1.GetProductResponse.product:type_name -> online_market.api.v1.Product
-	1,  // 10: online_market.api.v1.ListCategoriesResponse.categories:type_name -> online_market.api.v1.Category
-	3,  // 11: online_market.api.v1.CatalogService.ListProducts:input_type -> online_market.api.v1.ListProductsRequest
-	5,  // 12: online_market.api.v1.CatalogService.GetProduct:input_type -> online_market.api.v1.GetProductRequest
-	7,  // 13: online_market.api.v1.CatalogService.ListCategories:input_type -> online_market.api.v1.ListCategoriesRequest
-	4,  // 14: online_market.api.v1.CatalogService.ListProducts:output_type -> online_market.api.v1.ListProductsResponse
-	6,  // 15: online_market.api.v1.CatalogService.GetProduct:output_type -> online_market.api.v1.GetProductResponse
-	8,  // 16: online_market.api.v1.CatalogService.ListCategories:output_type -> online_market.api.v1.ListCategoriesResponse
-	14, // [14:17] is the sub-list for method output_type
-	11, // [11:14] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	10, // 6: online_market.api.v1.Product.min_order_amount:type_name -> online_market.api.v1.Money
+	11, // 7: online_market.api.v1.ListProductsRequest.page:type_name -> online_market.api.v1.PageRequest
+	2,  // 8: online_market.api.v1.ListProductsResponse.products:type_name -> online_market.api.v1.Product
+	12, // 9: online_market.api.v1.ListProductsResponse.page:type_name -> online_market.api.v1.PageResponse
+	2,  // 10: online_market.api.v1.GetProductResponse.product:type_name -> online_market.api.v1.Product
+	1,  // 11: online_market.api.v1.ListCategoriesResponse.categories:type_name -> online_market.api.v1.Category
+	3,  // 12: online_market.api.v1.CatalogService.ListProducts:input_type -> online_market.api.v1.ListProductsRequest
+	5,  // 13: online_market.api.v1.CatalogService.GetProduct:input_type -> online_market.api.v1.GetProductRequest
+	7,  // 14: online_market.api.v1.CatalogService.ListCategories:input_type -> online_market.api.v1.ListCategoriesRequest
+	4,  // 15: online_market.api.v1.CatalogService.ListProducts:output_type -> online_market.api.v1.ListProductsResponse
+	6,  // 16: online_market.api.v1.CatalogService.GetProduct:output_type -> online_market.api.v1.GetProductResponse
+	8,  // 17: online_market.api.v1.CatalogService.ListCategories:output_type -> online_market.api.v1.ListCategoriesResponse
+	15, // [15:18] is the sub-list for method output_type
+	12, // [12:15] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_online_market_v1_catalog_proto_init() }

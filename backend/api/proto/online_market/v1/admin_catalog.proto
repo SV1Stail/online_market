@@ -21,6 +21,9 @@ service AdminCatalogService {
   rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse);
   rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse);
   rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse);
+
+  // Creates missing categories and products and updates only fields present in the YAML file.
+  rpc ImportCatalog(ImportCatalogRequest) returns (ImportCatalogResponse);
 }
 
 message AdminProductFilter {
@@ -53,6 +56,12 @@ message CreateProductRequest {
   Money price = 3;
   ProductAvailability availability = 4;
   repeated string category_ids = 5;
+  // Empty means the price has no unit label.
+  string unit_of_measure = 6;
+  // Zero means this product has no minimum quantity.
+  uint32 min_order_quantity = 7;
+  // Absent or a zero amount means this product has no minimum line total.
+  Money min_order_amount = 8;
 }
 
 message CreateProductResponse {
@@ -65,6 +74,12 @@ message ProductPatch {
   Money price = 3;
   ProductAvailability availability = 4;
   repeated string category_ids = 5;
+  // Empty clears the unit label when unit_of_measure is in the update mask.
+  string unit_of_measure = 6;
+  // Zero clears the minimum quantity when min_order_quantity is in the update mask.
+  uint32 min_order_quantity = 7;
+  // Absent or a zero amount clears the minimum line total when min_order_amount is in the update mask.
+  Money min_order_amount = 8;
 }
 
 message UpdateProductRequest {
@@ -134,3 +149,15 @@ message DeleteCategoryRequest {
 }
 
 message DeleteCategoryResponse {}
+
+message ImportCatalogRequest {
+  // Catalog document in the seed YAML format. At most 1 MiB.
+  string yaml = 1;
+}
+
+message ImportCatalogResponse {
+  uint32 created_categories = 1;
+  uint32 updated_categories = 2;
+  uint32 created_products = 3;
+  uint32 updated_products = 4;
+}

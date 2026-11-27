@@ -16,15 +16,18 @@ const (
 )
 
 type Product struct {
-	ID           string
-	Name         string
-	Description  string
-	Price        money.Money
-	Availability Availability
-	CategoryIDs  []string
-	Version      uint64
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID               string
+	Name             string
+	Description      string
+	Price            money.Money
+	UnitOfMeasure    string
+	MinOrderQuantity uint32
+	MinOrderAmount   *money.Money
+	Availability     Availability
+	CategoryIDs      []string
+	Version          uint64
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type Category struct {

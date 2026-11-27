@@ -58,17 +58,23 @@ type AdminRepository interface {
 	RemoveItem(context.Context, string, string, uint64, string, []string) (*Order, error)
 	ChangeStatus(context.Context, string, uint64, string, Status, Status, string, []string) (*Order, error)
 	ListEvents(context.Context, string, *pagination.Cursor, int) ([]Event, error)
+	SetDeliveryDayLimit(context.Context, time.Time, int) (DeliveryDay, error)
+	CreateDeliveryPlace(context.Context, DeliveryPlace) (DeliveryPlace, error)
+	UpdateDeliveryPlace(context.Context, DeliveryPlace) (DeliveryPlace, error)
+	DeleteDeliveryPlace(context.Context, string) error
 }
 
 type AdminService struct {
 	repository           AdminRepository
 	notificationChannels []string
+	clock                Clock
 }
 
-func NewAdminService(repository AdminRepository, notificationChannels []string) *AdminService {
+func NewAdminService(repository AdminRepository, notificationChannels []string, clock Clock) *AdminService {
 	return &AdminService{
 		repository:           repository,
 		notificationChannels: append([]string(nil), notificationChannels...),
+		clock:                clock,
 	}
 }
 
@@ -154,6 +160,9 @@ func (s *AdminService) UpdateDetails(ctx context.Context, orderID string, expect
 		if err := validateDelivery(patch.Delivery); err != nil {
 			return nil, err
 		}
+		if err := validateAdminDeliveryDate(patch.Delivery.Date); err != nil {
+			return nil, err
+		}
 	}
 	if contains(patch.Paths, "assigned_admin_id") && patch.AssignedAdminID != "" && !identifier.IsUUID(patch.AssignedAdminID) {
 		return nil, apperror.Validation("patch.assigned_admin_id", "must be a valid UUID")
@@ -171,6 +180,71 @@ func (s *AdminService) UpdateDetails(ctx context.Context, orderID string, expect
 		return nil, fmt.Errorf("update order details: %w", err)
 	}
 	return result, nil
+}
+
+func (s *AdminService) SetDeliveryDayLimit(ctx context.Context, date time.Time, limit int) (DeliveryDay, error) {
+	if err := validateAdminDeliveryDate(date); err != nil {
+		return DeliveryDay{}, err
+	}
+	today, last := deliveryWindow(s.clock.Now())
+	if date.Before(today) || date.After(last) {
+		return DeliveryDay{}, apperror.Validation("date", "must be within the delivery window")
+	}
+	if err := validateDeliveryLimit(limit); err != nil {
+		return DeliveryDay{}, err
+	}
+	day, err := s.repository.SetDeliveryDayLimit(ctx, date, limit)
+	if err != nil {
+		return DeliveryDay{}, fmt.Errorf("set delivery day limit: %w", err)
+	}
+	return day, nil
+}
+
+func (s *AdminService) CreateDeliveryPlace(ctx context.Context, place DeliveryPlace) (DeliveryPlace, error) {
+	place = normalizeDeliveryPlace(place)
+	if err := validateDeliveryPlace(place, s.clock.Now()); err != nil {
+		return DeliveryPlace{}, err
+	}
+	created, err := s.repository.CreateDeliveryPlace(ctx, place)
+	if err != nil {
+		return DeliveryPlace{}, fmt.Errorf("create delivery place: %w", err)
+	}
+	return created, nil
+}
+
+func (s *AdminService) UpdateDeliveryPlace(ctx context.Context, place DeliveryPlace) (DeliveryPlace, error) {
+	place = normalizeDeliveryPlace(place)
+	if !identifier.IsUUID(place.ID) {
+		return DeliveryPlace{}, apperror.Validation("place_id", "must be a valid UUID")
+	}
+	if err := validateDeliveryPlace(place, s.clock.Now()); err != nil {
+		return DeliveryPlace{}, err
+	}
+	updated, err := s.repository.UpdateDeliveryPlace(ctx, place)
+	if err != nil {
+		return DeliveryPlace{}, fmt.Errorf("update delivery place: %w", err)
+	}
+	return updated, nil
+}
+
+func (s *AdminService) DeleteDeliveryPlace(ctx context.Context, id string) error {
+	id = strings.TrimSpace(id)
+	if !identifier.IsUUID(id) {
+		return apperror.Validation("place_id", "must be a valid UUID")
+	}
+	if err := s.repository.DeleteDeliveryPlace(ctx, id); err != nil {
+		return fmt.Errorf("delete delivery place: %w", err)
+	}
+	return nil
+}
+
+func normalizeDeliveryPlace(place DeliveryPlace) DeliveryPlace {
+	place.ID = strings.TrimSpace(place.ID)
+	place.Name = strings.TrimSpace(place.Name)
+	if place.ScheduleKind != ScheduleDates {
+		place.Dates = nil
+	}
+	return place
 }
 
 func (s *AdminService) AddItem(ctx context.Context, orderID string, expectedVersion uint64, actorID, productID string, quantity uint32, price *money.Money) (*Order, error) {

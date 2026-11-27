@@ -135,6 +135,61 @@ func (DeliveryMethod) EnumDescriptor() ([]byte, []int) {
 	return file_online_market_v1_order_proto_rawDescGZIP(), []int{1}
 }
 
+type DeliveryScheduleKind int32
+
+const (
+	DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_UNSPECIFIED DeliveryScheduleKind = 0
+	// Every day in the shop horizon.
+	DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_ALL DeliveryScheduleKind = 1
+	// Monday through Friday in the shop calendar.
+	DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_WEEKDAYS DeliveryScheduleKind = 2
+	// Only the dates listed on the place.
+	DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_DATES DeliveryScheduleKind = 3
+)
+
+// Enum value maps for DeliveryScheduleKind.
+var (
+	DeliveryScheduleKind_name = map[int32]string{
+		0: "DELIVERY_SCHEDULE_KIND_UNSPECIFIED",
+		1: "DELIVERY_SCHEDULE_KIND_ALL",
+		2: "DELIVERY_SCHEDULE_KIND_WEEKDAYS",
+		3: "DELIVERY_SCHEDULE_KIND_DATES",
+	}
+	DeliveryScheduleKind_value = map[string]int32{
+		"DELIVERY_SCHEDULE_KIND_UNSPECIFIED": 0,
+		"DELIVERY_SCHEDULE_KIND_ALL":         1,
+		"DELIVERY_SCHEDULE_KIND_WEEKDAYS":    2,
+		"DELIVERY_SCHEDULE_KIND_DATES":       3,
+	}
+)
+
+func (x DeliveryScheduleKind) Enum() *DeliveryScheduleKind {
+	p := new(DeliveryScheduleKind)
+	*p = x
+	return p
+}
+
+func (x DeliveryScheduleKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DeliveryScheduleKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_online_market_v1_order_proto_enumTypes[2].Descriptor()
+}
+
+func (DeliveryScheduleKind) Type() protoreflect.EnumType {
+	return &file_online_market_v1_order_proto_enumTypes[2]
+}
+
+func (x DeliveryScheduleKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DeliveryScheduleKind.Descriptor instead.
+func (DeliveryScheduleKind) EnumDescriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{2}
+}
+
 type CustomerContact struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FullName      string                 `protobuf:"bytes,1,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
@@ -196,11 +251,13 @@ func (x *CustomerContact) GetEmail() string {
 }
 
 type DeliveryDetails struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Method        DeliveryMethod         `protobuf:"varint,1,opt,name=method,proto3,enum=online_market.api.v1.DeliveryMethod" json:"method,omitempty"`
-	City          string                 `protobuf:"bytes,2,opt,name=city,proto3" json:"city,omitempty"`
-	Address       string                 `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
-	Comment       string                 `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Method  DeliveryMethod         `protobuf:"varint,1,opt,name=method,proto3,enum=online_market.api.v1.DeliveryMethod" json:"method,omitempty"`
+	City    string                 `protobuf:"bytes,2,opt,name=city,proto3" json:"city,omitempty"`
+	Address string                 `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Comment string                 `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Calendar day the customer expects delivery, YYYY-MM-DD in the shop calendar.
+	DeliveryDate  string `protobuf:"bytes,5,opt,name=delivery_date,json=deliveryDate,proto3" json:"delivery_date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -263,23 +320,102 @@ func (x *DeliveryDetails) GetComment() string {
 	return ""
 }
 
-// OrderItem is a snapshot. Its name and price do not change when the catalog
-// product is edited later.
-type OrderItem struct {
+func (x *DeliveryDetails) GetDeliveryDate() string {
+	if x != nil {
+		return x.DeliveryDate
+	}
+	return ""
+}
+
+// DeliveryDay is one shop calendar day and its delivery capacity.
+type DeliveryDay struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProductId     string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	ProductName   string                 `protobuf:"bytes,3,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
-	UnitPrice     *Money                 `protobuf:"bytes,4,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
-	Quantity      uint32                 `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	LineTotal     *Money                 `protobuf:"bytes,6,opt,name=line_total,json=lineTotal,proto3" json:"line_total,omitempty"`
+	Date          string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	Booked        uint32                 `protobuf:"varint,2,opt,name=booked,proto3" json:"booked,omitempty"`
+	DeliveryLimit uint32                 `protobuf:"varint,3,opt,name=delivery_limit,json=deliveryLimit,proto3" json:"delivery_limit,omitempty"`
+	// Slots still open. Zero means the day cannot accept another delivery.
+	Remaining     uint32 `protobuf:"varint,4,opt,name=remaining,proto3" json:"remaining,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeliveryDay) Reset() {
+	*x = DeliveryDay{}
+	mi := &file_online_market_v1_order_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeliveryDay) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeliveryDay) ProtoMessage() {}
+
+func (x *DeliveryDay) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_order_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeliveryDay.ProtoReflect.Descriptor instead.
+func (*DeliveryDay) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *DeliveryDay) GetDate() string {
+	if x != nil {
+		return x.Date
+	}
+	return ""
+}
+
+func (x *DeliveryDay) GetBooked() uint32 {
+	if x != nil {
+		return x.Booked
+	}
+	return 0
+}
+
+func (x *DeliveryDay) GetDeliveryLimit() uint32 {
+	if x != nil {
+		return x.DeliveryLimit
+	}
+	return 0
+}
+
+func (x *DeliveryDay) GetRemaining() uint32 {
+	if x != nil {
+		return x.Remaining
+	}
+	return 0
+}
+
+// OrderItem is a snapshot. Its name, price, and unit label do not change when
+// the catalog product is edited later.
+type OrderItem struct {
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Id          string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProductId   string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	ProductName string                 `protobuf:"bytes,3,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	UnitPrice   *Money                 `protobuf:"bytes,4,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
+	Quantity    uint32                 `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	LineTotal   *Money                 `protobuf:"bytes,6,opt,name=line_total,json=lineTotal,proto3" json:"line_total,omitempty"`
+	// Unit label copied from the catalog when the line was added. Empty if none.
+	UnitOfMeasure string `protobuf:"bytes,7,opt,name=unit_of_measure,json=unitOfMeasure,proto3" json:"unit_of_measure,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *OrderItem) Reset() {
 	*x = OrderItem{}
-	mi := &file_online_market_v1_order_proto_msgTypes[2]
+	mi := &file_online_market_v1_order_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -291,7 +427,7 @@ func (x *OrderItem) String() string {
 func (*OrderItem) ProtoMessage() {}
 
 func (x *OrderItem) ProtoReflect() protoreflect.Message {
-	mi := &file_online_market_v1_order_proto_msgTypes[2]
+	mi := &file_online_market_v1_order_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -304,7 +440,7 @@ func (x *OrderItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrderItem.ProtoReflect.Descriptor instead.
 func (*OrderItem) Descriptor() ([]byte, []int) {
-	return file_online_market_v1_order_proto_rawDescGZIP(), []int{2}
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *OrderItem) GetId() string {
@@ -349,6 +485,13 @@ func (x *OrderItem) GetLineTotal() *Money {
 	return nil
 }
 
+func (x *OrderItem) GetUnitOfMeasure() string {
+	if x != nil {
+		return x.UnitOfMeasure
+	}
+	return ""
+}
+
 type Order struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -369,7 +512,7 @@ type Order struct {
 
 func (x *Order) Reset() {
 	*x = Order{}
-	mi := &file_online_market_v1_order_proto_msgTypes[3]
+	mi := &file_online_market_v1_order_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -381,7 +524,7 @@ func (x *Order) String() string {
 func (*Order) ProtoMessage() {}
 
 func (x *Order) ProtoReflect() protoreflect.Message {
-	mi := &file_online_market_v1_order_proto_msgTypes[3]
+	mi := &file_online_market_v1_order_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -394,7 +537,7 @@ func (x *Order) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Order.ProtoReflect.Descriptor instead.
 func (*Order) Descriptor() ([]byte, []int) {
-	return file_online_market_v1_order_proto_rawDescGZIP(), []int{3}
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Order) GetId() string {
@@ -497,7 +640,7 @@ type CreateOrderRequest struct {
 
 func (x *CreateOrderRequest) Reset() {
 	*x = CreateOrderRequest{}
-	mi := &file_online_market_v1_order_proto_msgTypes[4]
+	mi := &file_online_market_v1_order_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -509,7 +652,7 @@ func (x *CreateOrderRequest) String() string {
 func (*CreateOrderRequest) ProtoMessage() {}
 
 func (x *CreateOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_online_market_v1_order_proto_msgTypes[4]
+	mi := &file_online_market_v1_order_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -522,7 +665,7 @@ func (x *CreateOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateOrderRequest.ProtoReflect.Descriptor instead.
 func (*CreateOrderRequest) Descriptor() ([]byte, []int) {
-	return file_online_market_v1_order_proto_rawDescGZIP(), []int{4}
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CreateOrderRequest) GetCartId() string {
@@ -578,7 +721,7 @@ type CreateOrderResponse struct {
 
 func (x *CreateOrderResponse) Reset() {
 	*x = CreateOrderResponse{}
-	mi := &file_online_market_v1_order_proto_msgTypes[5]
+	mi := &file_online_market_v1_order_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -590,7 +733,7 @@ func (x *CreateOrderResponse) String() string {
 func (*CreateOrderResponse) ProtoMessage() {}
 
 func (x *CreateOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_online_market_v1_order_proto_msgTypes[5]
+	mi := &file_online_market_v1_order_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -603,7 +746,7 @@ func (x *CreateOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateOrderResponse.ProtoReflect.Descriptor instead.
 func (*CreateOrderResponse) Descriptor() ([]byte, []int) {
-	return file_online_market_v1_order_proto_rawDescGZIP(), []int{5}
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CreateOrderResponse) GetOrder() *Order {
@@ -630,7 +773,7 @@ type GetOrderRequest struct {
 
 func (x *GetOrderRequest) Reset() {
 	*x = GetOrderRequest{}
-	mi := &file_online_market_v1_order_proto_msgTypes[6]
+	mi := &file_online_market_v1_order_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -642,7 +785,7 @@ func (x *GetOrderRequest) String() string {
 func (*GetOrderRequest) ProtoMessage() {}
 
 func (x *GetOrderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_online_market_v1_order_proto_msgTypes[6]
+	mi := &file_online_market_v1_order_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -655,7 +798,7 @@ func (x *GetOrderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrderRequest.ProtoReflect.Descriptor instead.
 func (*GetOrderRequest) Descriptor() ([]byte, []int) {
-	return file_online_market_v1_order_proto_rawDescGZIP(), []int{6}
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetOrderRequest) GetOrderNumber() string {
@@ -681,7 +824,7 @@ type GetOrderResponse struct {
 
 func (x *GetOrderResponse) Reset() {
 	*x = GetOrderResponse{}
-	mi := &file_online_market_v1_order_proto_msgTypes[7]
+	mi := &file_online_market_v1_order_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -693,7 +836,7 @@ func (x *GetOrderResponse) String() string {
 func (*GetOrderResponse) ProtoMessage() {}
 
 func (x *GetOrderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_online_market_v1_order_proto_msgTypes[7]
+	mi := &file_online_market_v1_order_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -706,12 +849,276 @@ func (x *GetOrderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrderResponse.ProtoReflect.Descriptor instead.
 func (*GetOrderResponse) Descriptor() ([]byte, []int) {
-	return file_online_market_v1_order_proto_rawDescGZIP(), []int{7}
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetOrderResponse) GetOrder() *Order {
 	if x != nil {
 		return x.Order
+	}
+	return nil
+}
+
+type DeliveryPlace struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Id           string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name         string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	DailyLimit   uint32                 `protobuf:"varint,3,opt,name=daily_limit,json=dailyLimit,proto3" json:"daily_limit,omitempty"`
+	ScheduleKind DeliveryScheduleKind   `protobuf:"varint,4,opt,name=schedule_kind,json=scheduleKind,proto3,enum=online_market.api.v1.DeliveryScheduleKind" json:"schedule_kind,omitempty"`
+	// YYYY-MM-DD. Used when schedule_kind is DATES.
+	Dates         []string `protobuf:"bytes,5,rep,name=dates,proto3" json:"dates,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeliveryPlace) Reset() {
+	*x = DeliveryPlace{}
+	mi := &file_online_market_v1_order_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeliveryPlace) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeliveryPlace) ProtoMessage() {}
+
+func (x *DeliveryPlace) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_order_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeliveryPlace.ProtoReflect.Descriptor instead.
+func (*DeliveryPlace) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DeliveryPlace) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *DeliveryPlace) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DeliveryPlace) GetDailyLimit() uint32 {
+	if x != nil {
+		return x.DailyLimit
+	}
+	return 0
+}
+
+func (x *DeliveryPlace) GetScheduleKind() DeliveryScheduleKind {
+	if x != nil {
+		return x.ScheduleKind
+	}
+	return DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_UNSPECIFIED
+}
+
+func (x *DeliveryPlace) GetDates() []string {
+	if x != nil {
+		return x.Dates
+	}
+	return nil
+}
+
+type ListDeliveryPlacesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeliveryPlacesRequest) Reset() {
+	*x = ListDeliveryPlacesRequest{}
+	mi := &file_online_market_v1_order_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeliveryPlacesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeliveryPlacesRequest) ProtoMessage() {}
+
+func (x *ListDeliveryPlacesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_order_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeliveryPlacesRequest.ProtoReflect.Descriptor instead.
+func (*ListDeliveryPlacesRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{10}
+}
+
+type ListDeliveryPlacesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Places        []*DeliveryPlace       `protobuf:"bytes,1,rep,name=places,proto3" json:"places,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeliveryPlacesResponse) Reset() {
+	*x = ListDeliveryPlacesResponse{}
+	mi := &file_online_market_v1_order_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeliveryPlacesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeliveryPlacesResponse) ProtoMessage() {}
+
+func (x *ListDeliveryPlacesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_order_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeliveryPlacesResponse.ProtoReflect.Descriptor instead.
+func (*ListDeliveryPlacesResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListDeliveryPlacesResponse) GetPlaces() []*DeliveryPlace {
+	if x != nil {
+		return x.Places
+	}
+	return nil
+}
+
+type ListDeliveryDaysRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Inclusive first day, YYYY-MM-DD. Empty starts at the shop's current day.
+	FromDate string `protobuf:"bytes,1,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"`
+	// Number of days to return. Zero uses the server horizon.
+	Days uint32 `protobuf:"varint,2,opt,name=days,proto3" json:"days,omitempty"`
+	// City or settlement the customer wants delivery to.
+	City          string `protobuf:"bytes,3,opt,name=city,proto3" json:"city,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeliveryDaysRequest) Reset() {
+	*x = ListDeliveryDaysRequest{}
+	mi := &file_online_market_v1_order_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeliveryDaysRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeliveryDaysRequest) ProtoMessage() {}
+
+func (x *ListDeliveryDaysRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_order_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeliveryDaysRequest.ProtoReflect.Descriptor instead.
+func (*ListDeliveryDaysRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListDeliveryDaysRequest) GetFromDate() string {
+	if x != nil {
+		return x.FromDate
+	}
+	return ""
+}
+
+func (x *ListDeliveryDaysRequest) GetDays() uint32 {
+	if x != nil {
+		return x.Days
+	}
+	return 0
+}
+
+func (x *ListDeliveryDaysRequest) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+type ListDeliveryDaysResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Days          []*DeliveryDay         `protobuf:"bytes,1,rep,name=days,proto3" json:"days,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDeliveryDaysResponse) Reset() {
+	*x = ListDeliveryDaysResponse{}
+	mi := &file_online_market_v1_order_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDeliveryDaysResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDeliveryDaysResponse) ProtoMessage() {}
+
+func (x *ListDeliveryDaysResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_order_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDeliveryDaysResponse.ProtoReflect.Descriptor instead.
+func (*ListDeliveryDaysResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_order_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListDeliveryDaysResponse) GetDays() []*DeliveryDay {
+	if x != nil {
+		return x.Days
 	}
 	return nil
 }
@@ -724,12 +1131,18 @@ const file_online_market_v1_order_proto_rawDesc = "" +
 	"\x0fCustomerContact\x12\x1b\n" +
 	"\tfull_name\x18\x01 \x01(\tR\bfullName\x12\x14\n" +
 	"\x05phone\x18\x02 \x01(\tR\x05phone\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\"\x97\x01\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\"\xbc\x01\n" +
 	"\x0fDeliveryDetails\x12<\n" +
 	"\x06method\x18\x01 \x01(\x0e2$.online_market.api.v1.DeliveryMethodR\x06method\x12\x12\n" +
 	"\x04city\x18\x02 \x01(\tR\x04city\x12\x18\n" +
 	"\aaddress\x18\x03 \x01(\tR\aaddress\x12\x18\n" +
-	"\acomment\x18\x04 \x01(\tR\acomment\"\xf1\x01\n" +
+	"\acomment\x18\x04 \x01(\tR\acomment\x12#\n" +
+	"\rdelivery_date\x18\x05 \x01(\tR\fdeliveryDate\"~\n" +
+	"\vDeliveryDay\x12\x12\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\x12\x16\n" +
+	"\x06booked\x18\x02 \x01(\rR\x06booked\x12%\n" +
+	"\x0edelivery_limit\x18\x03 \x01(\rR\rdeliveryLimit\x12\x1c\n" +
+	"\tremaining\x18\x04 \x01(\rR\tremaining\"\x99\x02\n" +
 	"\tOrderItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -739,7 +1152,8 @@ const file_online_market_v1_order_proto_rawDesc = "" +
 	"unit_price\x18\x04 \x01(\v2\x1b.online_market.api.v1.MoneyR\tunitPrice\x12\x1a\n" +
 	"\bquantity\x18\x05 \x01(\rR\bquantity\x12:\n" +
 	"\n" +
-	"line_total\x18\x06 \x01(\v2\x1b.online_market.api.v1.MoneyR\tlineTotal\"\xa9\x04\n" +
+	"line_total\x18\x06 \x01(\v2\x1b.online_market.api.v1.MoneyR\tlineTotal\x12&\n" +
+	"\x0funit_of_measure\x18\a \x01(\tR\runitOfMeasure\"\xa9\x04\n" +
 	"\x05Order\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06number\x18\x02 \x01(\tR\x06number\x12\x12\n" +
@@ -773,7 +1187,23 @@ const file_online_market_v1_order_proto_rawDesc = "" +
 	"\vorder_token\x18\x02 \x01(\tR\n" +
 	"orderToken\"E\n" +
 	"\x10GetOrderResponse\x121\n" +
-	"\x05order\x18\x01 \x01(\v2\x1b.online_market.api.v1.OrderR\x05order*\xe8\x01\n" +
+	"\x05order\x18\x01 \x01(\v2\x1b.online_market.api.v1.OrderR\x05order\"\xbb\x01\n" +
+	"\rDeliveryPlace\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
+	"\vdaily_limit\x18\x03 \x01(\rR\n" +
+	"dailyLimit\x12O\n" +
+	"\rschedule_kind\x18\x04 \x01(\x0e2*.online_market.api.v1.DeliveryScheduleKindR\fscheduleKind\x12\x14\n" +
+	"\x05dates\x18\x05 \x03(\tR\x05dates\"\x1b\n" +
+	"\x19ListDeliveryPlacesRequest\"Y\n" +
+	"\x1aListDeliveryPlacesResponse\x12;\n" +
+	"\x06places\x18\x01 \x03(\v2#.online_market.api.v1.DeliveryPlaceR\x06places\"^\n" +
+	"\x17ListDeliveryDaysRequest\x12\x1b\n" +
+	"\tfrom_date\x18\x01 \x01(\tR\bfromDate\x12\x12\n" +
+	"\x04days\x18\x02 \x01(\rR\x04days\x12\x12\n" +
+	"\x04city\x18\x03 \x01(\tR\x04city\"Q\n" +
+	"\x18ListDeliveryDaysResponse\x125\n" +
+	"\x04days\x18\x01 \x03(\v2!.online_market.api.v1.DeliveryDayR\x04days*\xe8\x01\n" +
 	"\vOrderStatus\x12\x1c\n" +
 	"\x18ORDER_STATUS_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10ORDER_STATUS_NEW\x10\x01\x12\x1a\n" +
@@ -786,10 +1216,17 @@ const file_online_market_v1_order_proto_rawDesc = "" +
 	"\x0eDeliveryMethod\x12\x1f\n" +
 	"\x1bDELIVERY_METHOD_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16DELIVERY_METHOD_PICKUP\x10\x01\x12\x1b\n" +
-	"\x17DELIVERY_METHOD_COURIER\x10\x022\xcd\x01\n" +
+	"\x17DELIVERY_METHOD_COURIER\x10\x02*\xa5\x01\n" +
+	"\x14DeliveryScheduleKind\x12&\n" +
+	"\"DELIVERY_SCHEDULE_KIND_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aDELIVERY_SCHEDULE_KIND_ALL\x10\x01\x12#\n" +
+	"\x1fDELIVERY_SCHEDULE_KIND_WEEKDAYS\x10\x02\x12 \n" +
+	"\x1cDELIVERY_SCHEDULE_KIND_DATES\x10\x032\xb9\x03\n" +
 	"\fOrderService\x12b\n" +
 	"\vCreateOrder\x12(.online_market.api.v1.CreateOrderRequest\x1a).online_market.api.v1.CreateOrderResponse\x12Y\n" +
-	"\bGetOrder\x12%.online_market.api.v1.GetOrderRequest\x1a&.online_market.api.v1.GetOrderResponseBAZ?github.com/SV1Stail/online_market/gen/online_market/v1;marketv1b\x06proto3"
+	"\bGetOrder\x12%.online_market.api.v1.GetOrderRequest\x1a&.online_market.api.v1.GetOrderResponse\x12w\n" +
+	"\x12ListDeliveryPlaces\x12/.online_market.api.v1.ListDeliveryPlacesRequest\x1a0.online_market.api.v1.ListDeliveryPlacesResponse\x12q\n" +
+	"\x10ListDeliveryDays\x12-.online_market.api.v1.ListDeliveryDaysRequest\x1a..online_market.api.v1.ListDeliveryDaysResponseBAZ?github.com/SV1Stail/online_market/gen/online_market/v1;marketv1b\x06proto3"
 
 var (
 	file_online_market_v1_order_proto_rawDescOnce sync.Once
@@ -803,46 +1240,60 @@ func file_online_market_v1_order_proto_rawDescGZIP() []byte {
 	return file_online_market_v1_order_proto_rawDescData
 }
 
-var file_online_market_v1_order_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_online_market_v1_order_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_online_market_v1_order_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_online_market_v1_order_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_online_market_v1_order_proto_goTypes = []any{
-	(OrderStatus)(0),              // 0: online_market.api.v1.OrderStatus
-	(DeliveryMethod)(0),           // 1: online_market.api.v1.DeliveryMethod
-	(*CustomerContact)(nil),       // 2: online_market.api.v1.CustomerContact
-	(*DeliveryDetails)(nil),       // 3: online_market.api.v1.DeliveryDetails
-	(*OrderItem)(nil),             // 4: online_market.api.v1.OrderItem
-	(*Order)(nil),                 // 5: online_market.api.v1.Order
-	(*CreateOrderRequest)(nil),    // 6: online_market.api.v1.CreateOrderRequest
-	(*CreateOrderResponse)(nil),   // 7: online_market.api.v1.CreateOrderResponse
-	(*GetOrderRequest)(nil),       // 8: online_market.api.v1.GetOrderRequest
-	(*GetOrderResponse)(nil),      // 9: online_market.api.v1.GetOrderResponse
-	(*Money)(nil),                 // 10: online_market.api.v1.Money
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(OrderStatus)(0),                   // 0: online_market.api.v1.OrderStatus
+	(DeliveryMethod)(0),                // 1: online_market.api.v1.DeliveryMethod
+	(DeliveryScheduleKind)(0),          // 2: online_market.api.v1.DeliveryScheduleKind
+	(*CustomerContact)(nil),            // 3: online_market.api.v1.CustomerContact
+	(*DeliveryDetails)(nil),            // 4: online_market.api.v1.DeliveryDetails
+	(*DeliveryDay)(nil),                // 5: online_market.api.v1.DeliveryDay
+	(*OrderItem)(nil),                  // 6: online_market.api.v1.OrderItem
+	(*Order)(nil),                      // 7: online_market.api.v1.Order
+	(*CreateOrderRequest)(nil),         // 8: online_market.api.v1.CreateOrderRequest
+	(*CreateOrderResponse)(nil),        // 9: online_market.api.v1.CreateOrderResponse
+	(*GetOrderRequest)(nil),            // 10: online_market.api.v1.GetOrderRequest
+	(*GetOrderResponse)(nil),           // 11: online_market.api.v1.GetOrderResponse
+	(*DeliveryPlace)(nil),              // 12: online_market.api.v1.DeliveryPlace
+	(*ListDeliveryPlacesRequest)(nil),  // 13: online_market.api.v1.ListDeliveryPlacesRequest
+	(*ListDeliveryPlacesResponse)(nil), // 14: online_market.api.v1.ListDeliveryPlacesResponse
+	(*ListDeliveryDaysRequest)(nil),    // 15: online_market.api.v1.ListDeliveryDaysRequest
+	(*ListDeliveryDaysResponse)(nil),   // 16: online_market.api.v1.ListDeliveryDaysResponse
+	(*Money)(nil),                      // 17: online_market.api.v1.Money
+	(*timestamppb.Timestamp)(nil),      // 18: google.protobuf.Timestamp
 }
 var file_online_market_v1_order_proto_depIdxs = []int32{
 	1,  // 0: online_market.api.v1.DeliveryDetails.method:type_name -> online_market.api.v1.DeliveryMethod
-	10, // 1: online_market.api.v1.OrderItem.unit_price:type_name -> online_market.api.v1.Money
-	10, // 2: online_market.api.v1.OrderItem.line_total:type_name -> online_market.api.v1.Money
-	2,  // 3: online_market.api.v1.Order.customer:type_name -> online_market.api.v1.CustomerContact
-	3,  // 4: online_market.api.v1.Order.delivery:type_name -> online_market.api.v1.DeliveryDetails
+	17, // 1: online_market.api.v1.OrderItem.unit_price:type_name -> online_market.api.v1.Money
+	17, // 2: online_market.api.v1.OrderItem.line_total:type_name -> online_market.api.v1.Money
+	3,  // 3: online_market.api.v1.Order.customer:type_name -> online_market.api.v1.CustomerContact
+	4,  // 4: online_market.api.v1.Order.delivery:type_name -> online_market.api.v1.DeliveryDetails
 	0,  // 5: online_market.api.v1.Order.status:type_name -> online_market.api.v1.OrderStatus
-	4,  // 6: online_market.api.v1.Order.items:type_name -> online_market.api.v1.OrderItem
-	10, // 7: online_market.api.v1.Order.total:type_name -> online_market.api.v1.Money
-	11, // 8: online_market.api.v1.Order.created_at:type_name -> google.protobuf.Timestamp
-	11, // 9: online_market.api.v1.Order.updated_at:type_name -> google.protobuf.Timestamp
-	2,  // 10: online_market.api.v1.CreateOrderRequest.customer:type_name -> online_market.api.v1.CustomerContact
-	3,  // 11: online_market.api.v1.CreateOrderRequest.delivery:type_name -> online_market.api.v1.DeliveryDetails
-	5,  // 12: online_market.api.v1.CreateOrderResponse.order:type_name -> online_market.api.v1.Order
-	5,  // 13: online_market.api.v1.GetOrderResponse.order:type_name -> online_market.api.v1.Order
-	6,  // 14: online_market.api.v1.OrderService.CreateOrder:input_type -> online_market.api.v1.CreateOrderRequest
-	8,  // 15: online_market.api.v1.OrderService.GetOrder:input_type -> online_market.api.v1.GetOrderRequest
-	7,  // 16: online_market.api.v1.OrderService.CreateOrder:output_type -> online_market.api.v1.CreateOrderResponse
-	9,  // 17: online_market.api.v1.OrderService.GetOrder:output_type -> online_market.api.v1.GetOrderResponse
-	16, // [16:18] is the sub-list for method output_type
-	14, // [14:16] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	6,  // 6: online_market.api.v1.Order.items:type_name -> online_market.api.v1.OrderItem
+	17, // 7: online_market.api.v1.Order.total:type_name -> online_market.api.v1.Money
+	18, // 8: online_market.api.v1.Order.created_at:type_name -> google.protobuf.Timestamp
+	18, // 9: online_market.api.v1.Order.updated_at:type_name -> google.protobuf.Timestamp
+	3,  // 10: online_market.api.v1.CreateOrderRequest.customer:type_name -> online_market.api.v1.CustomerContact
+	4,  // 11: online_market.api.v1.CreateOrderRequest.delivery:type_name -> online_market.api.v1.DeliveryDetails
+	7,  // 12: online_market.api.v1.CreateOrderResponse.order:type_name -> online_market.api.v1.Order
+	7,  // 13: online_market.api.v1.GetOrderResponse.order:type_name -> online_market.api.v1.Order
+	2,  // 14: online_market.api.v1.DeliveryPlace.schedule_kind:type_name -> online_market.api.v1.DeliveryScheduleKind
+	12, // 15: online_market.api.v1.ListDeliveryPlacesResponse.places:type_name -> online_market.api.v1.DeliveryPlace
+	5,  // 16: online_market.api.v1.ListDeliveryDaysResponse.days:type_name -> online_market.api.v1.DeliveryDay
+	8,  // 17: online_market.api.v1.OrderService.CreateOrder:input_type -> online_market.api.v1.CreateOrderRequest
+	10, // 18: online_market.api.v1.OrderService.GetOrder:input_type -> online_market.api.v1.GetOrderRequest
+	13, // 19: online_market.api.v1.OrderService.ListDeliveryPlaces:input_type -> online_market.api.v1.ListDeliveryPlacesRequest
+	15, // 20: online_market.api.v1.OrderService.ListDeliveryDays:input_type -> online_market.api.v1.ListDeliveryDaysRequest
+	9,  // 21: online_market.api.v1.OrderService.CreateOrder:output_type -> online_market.api.v1.CreateOrderResponse
+	11, // 22: online_market.api.v1.OrderService.GetOrder:output_type -> online_market.api.v1.GetOrderResponse
+	14, // 23: online_market.api.v1.OrderService.ListDeliveryPlaces:output_type -> online_market.api.v1.ListDeliveryPlacesResponse
+	16, // 24: online_market.api.v1.OrderService.ListDeliveryDays:output_type -> online_market.api.v1.ListDeliveryDaysResponse
+	21, // [21:25] is the sub-list for method output_type
+	17, // [17:21] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_online_market_v1_order_proto_init() }
@@ -856,8 +1307,8 @@ func file_online_market_v1_order_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_online_market_v1_order_proto_rawDesc), len(file_online_market_v1_order_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   8,
+			NumEnums:      3,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
