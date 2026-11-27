@@ -184,6 +184,12 @@ func (r *memoryCatalogRepository) UpdateProduct(_ context.Context, productID str
 			product.Price = *patch.Price
 		case "availability":
 			product.Availability = patch.Availability
+		case "unit_of_measure":
+			product.UnitOfMeasure = patch.UnitOfMeasure
+		case "min_order_quantity":
+			product.MinOrderQuantity = patch.MinOrderQuantity
+		case "min_order_amount":
+			product.MinOrderAmount = patch.MinOrderAmount
 		case "category_ids":
 			for _, categoryID := range patch.CategoryIDs {
 				if _, exists := r.state.categories[categoryID]; !exists {
@@ -432,6 +438,9 @@ func (r *memoryCartRepository) cartViewLocked(record cartRecord) (*cart.Cart, er
 		storedItem.UnitPrice = product.Price
 		storedItem.LineTotal = lineTotal
 		storedItem.Availability = product.Availability
+		storedItem.UnitOfMeasure = product.UnitOfMeasure
+		storedItem.MinOrderQuantity = product.MinOrderQuantity
+		storedItem.MinOrderAmount = cloneMoney(product.MinOrderAmount)
 		result.Items = append(result.Items, storedItem)
 	}
 	result.Total = total
@@ -466,7 +475,16 @@ func matchesAvailability(value catalog.Availability, requested []catalog.Availab
 
 func cloneProduct(product catalog.Product) catalog.Product {
 	product.CategoryIDs = append([]string(nil), product.CategoryIDs...)
+	product.MinOrderAmount = cloneMoney(product.MinOrderAmount)
 	return product
+}
+
+func cloneMoney(amount *money.Money) *money.Money {
+	if amount == nil {
+		return nil
+	}
+	copy := *amount
+	return &copy
 }
 
 func sortProducts(products []catalog.Product) {

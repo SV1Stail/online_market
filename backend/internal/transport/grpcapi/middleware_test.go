@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"testing"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/SV1Stail/online_market/internal/apperror"
 	"github.com/SV1Stail/online_market/internal/observability"
+	"github.com/SV1Stail/online_market/internal/order"
 )
 
 func TestRequestIDInterceptorUsesIncomingRequestID(t *testing.T) {
@@ -120,6 +122,26 @@ func TestErrorMappingInterceptorMapsApplicationError(t *testing.T) {
 			require.Equal(t, testCase.wantCode, status.Code(err))
 		})
 	}
+}
+
+func TestErrorMappingKeepsFullDeliveryDayMessage(t *testing.T) {
+	interceptor := ErrorMappingInterceptor(discardLogger())
+	_, err := interceptor(context.Background(), nil, unaryServerInfo(), func(context.Context, any) (any, error) {
+		return nil, fmt.Errorf("%w: %s", apperror.ErrPrecondition, order.DeliveryDayFullMessage)
+	})
+
+	require.Equal(t, codes.FailedPrecondition, status.Code(err))
+	require.Equal(t, order.DeliveryDayFullMessage, status.Convert(err).Message())
+}
+
+func TestErrorMappingKeepsOrderMinimumMessage(t *testing.T) {
+	interceptor := ErrorMappingInterceptor(discardLogger())
+	_, err := interceptor(context.Background(), nil, unaryServerInfo(), func(context.Context, any) (any, error) {
+		return nil, fmt.Errorf("%w: %s", apperror.ErrPrecondition, order.OrderMinimumMessage)
+	})
+
+	require.Equal(t, codes.FailedPrecondition, status.Code(err))
+	require.Equal(t, order.OrderMinimumMessage, status.Convert(err).Message())
 }
 
 func TestStructuredLoggingInterceptorWritesCallFields(t *testing.T) {

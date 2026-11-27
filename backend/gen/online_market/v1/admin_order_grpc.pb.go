@@ -19,14 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AdminOrderService_ListOrders_FullMethodName         = "/online_market.api.v1.AdminOrderService/ListOrders"
-	AdminOrderService_GetOrder_FullMethodName           = "/online_market.api.v1.AdminOrderService/GetOrder"
-	AdminOrderService_UpdateOrderDetails_FullMethodName = "/online_market.api.v1.AdminOrderService/UpdateOrderDetails"
-	AdminOrderService_AddOrderItem_FullMethodName       = "/online_market.api.v1.AdminOrderService/AddOrderItem"
-	AdminOrderService_UpdateOrderItem_FullMethodName    = "/online_market.api.v1.AdminOrderService/UpdateOrderItem"
-	AdminOrderService_RemoveOrderItem_FullMethodName    = "/online_market.api.v1.AdminOrderService/RemoveOrderItem"
-	AdminOrderService_ChangeOrderStatus_FullMethodName  = "/online_market.api.v1.AdminOrderService/ChangeOrderStatus"
-	AdminOrderService_ListOrderEvents_FullMethodName    = "/online_market.api.v1.AdminOrderService/ListOrderEvents"
+	AdminOrderService_ListOrders_FullMethodName          = "/online_market.api.v1.AdminOrderService/ListOrders"
+	AdminOrderService_GetOrder_FullMethodName            = "/online_market.api.v1.AdminOrderService/GetOrder"
+	AdminOrderService_UpdateOrderDetails_FullMethodName  = "/online_market.api.v1.AdminOrderService/UpdateOrderDetails"
+	AdminOrderService_AddOrderItem_FullMethodName        = "/online_market.api.v1.AdminOrderService/AddOrderItem"
+	AdminOrderService_UpdateOrderItem_FullMethodName     = "/online_market.api.v1.AdminOrderService/UpdateOrderItem"
+	AdminOrderService_RemoveOrderItem_FullMethodName     = "/online_market.api.v1.AdminOrderService/RemoveOrderItem"
+	AdminOrderService_ChangeOrderStatus_FullMethodName   = "/online_market.api.v1.AdminOrderService/ChangeOrderStatus"
+	AdminOrderService_ListOrderEvents_FullMethodName     = "/online_market.api.v1.AdminOrderService/ListOrderEvents"
+	AdminOrderService_SetDeliveryDayLimit_FullMethodName = "/online_market.api.v1.AdminOrderService/SetDeliveryDayLimit"
+	AdminOrderService_CreateDeliveryPlace_FullMethodName = "/online_market.api.v1.AdminOrderService/CreateDeliveryPlace"
+	AdminOrderService_UpdateDeliveryPlace_FullMethodName = "/online_market.api.v1.AdminOrderService/UpdateDeliveryPlace"
+	AdminOrderService_DeleteDeliveryPlace_FullMethodName = "/online_market.api.v1.AdminOrderService/DeleteDeliveryPlace"
 )
 
 // AdminOrderServiceClient is the client API for AdminOrderService service.
@@ -41,6 +45,10 @@ type AdminOrderServiceClient interface {
 	RemoveOrderItem(ctx context.Context, in *RemoveOrderItemRequest, opts ...grpc.CallOption) (*RemoveOrderItemResponse, error)
 	ChangeOrderStatus(ctx context.Context, in *ChangeOrderStatusRequest, opts ...grpc.CallOption) (*ChangeOrderStatusResponse, error)
 	ListOrderEvents(ctx context.Context, in *ListOrderEventsRequest, opts ...grpc.CallOption) (*ListOrderEventsResponse, error)
+	SetDeliveryDayLimit(ctx context.Context, in *SetDeliveryDayLimitRequest, opts ...grpc.CallOption) (*SetDeliveryDayLimitResponse, error)
+	CreateDeliveryPlace(ctx context.Context, in *CreateDeliveryPlaceRequest, opts ...grpc.CallOption) (*CreateDeliveryPlaceResponse, error)
+	UpdateDeliveryPlace(ctx context.Context, in *UpdateDeliveryPlaceRequest, opts ...grpc.CallOption) (*UpdateDeliveryPlaceResponse, error)
+	DeleteDeliveryPlace(ctx context.Context, in *DeleteDeliveryPlaceRequest, opts ...grpc.CallOption) (*DeleteDeliveryPlaceResponse, error)
 }
 
 type adminOrderServiceClient struct {
@@ -131,6 +139,46 @@ func (c *adminOrderServiceClient) ListOrderEvents(ctx context.Context, in *ListO
 	return out, nil
 }
 
+func (c *adminOrderServiceClient) SetDeliveryDayLimit(ctx context.Context, in *SetDeliveryDayLimitRequest, opts ...grpc.CallOption) (*SetDeliveryDayLimitResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetDeliveryDayLimitResponse)
+	err := c.cc.Invoke(ctx, AdminOrderService_SetDeliveryDayLimit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminOrderServiceClient) CreateDeliveryPlace(ctx context.Context, in *CreateDeliveryPlaceRequest, opts ...grpc.CallOption) (*CreateDeliveryPlaceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDeliveryPlaceResponse)
+	err := c.cc.Invoke(ctx, AdminOrderService_CreateDeliveryPlace_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminOrderServiceClient) UpdateDeliveryPlace(ctx context.Context, in *UpdateDeliveryPlaceRequest, opts ...grpc.CallOption) (*UpdateDeliveryPlaceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDeliveryPlaceResponse)
+	err := c.cc.Invoke(ctx, AdminOrderService_UpdateDeliveryPlace_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminOrderServiceClient) DeleteDeliveryPlace(ctx context.Context, in *DeleteDeliveryPlaceRequest, opts ...grpc.CallOption) (*DeleteDeliveryPlaceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDeliveryPlaceResponse)
+	err := c.cc.Invoke(ctx, AdminOrderService_DeleteDeliveryPlace_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminOrderServiceServer is the server API for AdminOrderService service.
 // All implementations must embed UnimplementedAdminOrderServiceServer
 // for forward compatibility.
@@ -143,6 +191,10 @@ type AdminOrderServiceServer interface {
 	RemoveOrderItem(context.Context, *RemoveOrderItemRequest) (*RemoveOrderItemResponse, error)
 	ChangeOrderStatus(context.Context, *ChangeOrderStatusRequest) (*ChangeOrderStatusResponse, error)
 	ListOrderEvents(context.Context, *ListOrderEventsRequest) (*ListOrderEventsResponse, error)
+	SetDeliveryDayLimit(context.Context, *SetDeliveryDayLimitRequest) (*SetDeliveryDayLimitResponse, error)
+	CreateDeliveryPlace(context.Context, *CreateDeliveryPlaceRequest) (*CreateDeliveryPlaceResponse, error)
+	UpdateDeliveryPlace(context.Context, *UpdateDeliveryPlaceRequest) (*UpdateDeliveryPlaceResponse, error)
+	DeleteDeliveryPlace(context.Context, *DeleteDeliveryPlaceRequest) (*DeleteDeliveryPlaceResponse, error)
 	mustEmbedUnimplementedAdminOrderServiceServer()
 }
 
@@ -176,6 +228,18 @@ func (UnimplementedAdminOrderServiceServer) ChangeOrderStatus(context.Context, *
 }
 func (UnimplementedAdminOrderServiceServer) ListOrderEvents(context.Context, *ListOrderEventsRequest) (*ListOrderEventsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListOrderEvents not implemented")
+}
+func (UnimplementedAdminOrderServiceServer) SetDeliveryDayLimit(context.Context, *SetDeliveryDayLimitRequest) (*SetDeliveryDayLimitResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetDeliveryDayLimit not implemented")
+}
+func (UnimplementedAdminOrderServiceServer) CreateDeliveryPlace(context.Context, *CreateDeliveryPlaceRequest) (*CreateDeliveryPlaceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateDeliveryPlace not implemented")
+}
+func (UnimplementedAdminOrderServiceServer) UpdateDeliveryPlace(context.Context, *UpdateDeliveryPlaceRequest) (*UpdateDeliveryPlaceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateDeliveryPlace not implemented")
+}
+func (UnimplementedAdminOrderServiceServer) DeleteDeliveryPlace(context.Context, *DeleteDeliveryPlaceRequest) (*DeleteDeliveryPlaceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteDeliveryPlace not implemented")
 }
 func (UnimplementedAdminOrderServiceServer) mustEmbedUnimplementedAdminOrderServiceServer() {}
 func (UnimplementedAdminOrderServiceServer) testEmbeddedByValue()                           {}
@@ -342,6 +406,78 @@ func _AdminOrderService_ListOrderEvents_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminOrderService_SetDeliveryDayLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetDeliveryDayLimitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminOrderServiceServer).SetDeliveryDayLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminOrderService_SetDeliveryDayLimit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminOrderServiceServer).SetDeliveryDayLimit(ctx, req.(*SetDeliveryDayLimitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminOrderService_CreateDeliveryPlace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDeliveryPlaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminOrderServiceServer).CreateDeliveryPlace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminOrderService_CreateDeliveryPlace_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminOrderServiceServer).CreateDeliveryPlace(ctx, req.(*CreateDeliveryPlaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminOrderService_UpdateDeliveryPlace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDeliveryPlaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminOrderServiceServer).UpdateDeliveryPlace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminOrderService_UpdateDeliveryPlace_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminOrderServiceServer).UpdateDeliveryPlace(ctx, req.(*UpdateDeliveryPlaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminOrderService_DeleteDeliveryPlace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDeliveryPlaceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminOrderServiceServer).DeleteDeliveryPlace(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminOrderService_DeleteDeliveryPlace_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminOrderServiceServer).DeleteDeliveryPlace(ctx, req.(*DeleteDeliveryPlaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminOrderService_ServiceDesc is the grpc.ServiceDesc for AdminOrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +516,22 @@ var AdminOrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListOrderEvents",
 			Handler:    _AdminOrderService_ListOrderEvents_Handler,
+		},
+		{
+			MethodName: "SetDeliveryDayLimit",
+			Handler:    _AdminOrderService_SetDeliveryDayLimit_Handler,
+		},
+		{
+			MethodName: "CreateDeliveryPlace",
+			Handler:    _AdminOrderService_CreateDeliveryPlace_Handler,
+		},
+		{
+			MethodName: "UpdateDeliveryPlace",
+			Handler:    _AdminOrderService_UpdateDeliveryPlace_Handler,
+		},
+		{
+			MethodName: "DeleteDeliveryPlace",
+			Handler:    _AdminOrderService_DeleteDeliveryPlace_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

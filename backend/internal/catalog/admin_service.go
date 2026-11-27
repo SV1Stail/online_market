@@ -28,12 +28,15 @@ type CategoryPatch struct {
 }
 
 type ProductPatch struct {
-	Name         string
-	Description  string
-	Price        *money.Money
-	Availability Availability
-	CategoryIDs  []string
-	Paths        []string
+	Name             string
+	Description      string
+	Price            *money.Money
+	Availability     Availability
+	CategoryIDs      []string
+	UnitOfMeasure    string
+	MinOrderQuantity uint32
+	MinOrderAmount   *money.Money
+	Paths            []string
 }
 
 type AdminRepository interface {
@@ -119,7 +122,10 @@ func (s *AdminService) GetProduct(ctx context.Context, productID string) (*Produ
 
 func (s *AdminService) CreateProduct(ctx context.Context, patch ProductPatch) (*Product, error) {
 	patch = normalizeProductPatch(patch)
-	if err := validateProductPatch(patch, []string{"name", "description", "price", "availability", "category_ids"}); err != nil {
+	if err := validateProductPatch(patch, []string{
+		"name", "description", "price", "availability", "category_ids",
+		"unit_of_measure", "min_order_quantity", "min_order_amount",
+	}); err != nil {
 		return nil, err
 	}
 	id, err := s.ids.UUID()
@@ -128,6 +134,7 @@ func (s *AdminService) CreateProduct(ctx context.Context, patch ProductPatch) (*
 	}
 	result, err := s.repository.CreateProduct(ctx, Product{
 		ID: id, Name: patch.Name, Description: patch.Description, Price: *patch.Price,
+		UnitOfMeasure: patch.UnitOfMeasure, MinOrderQuantity: patch.MinOrderQuantity, MinOrderAmount: patch.MinOrderAmount,
 		Availability: patch.Availability, CategoryIDs: patch.CategoryIDs, Version: 1,
 	})
 	if err != nil {
@@ -246,13 +253,18 @@ func (s *AdminService) DeleteCategory(ctx context.Context, categoryID string, ex
 func normalizeProductPatch(patch ProductPatch) ProductPatch {
 	patch.Name = strings.TrimSpace(patch.Name)
 	patch.Description = strings.TrimSpace(patch.Description)
+	patch.UnitOfMeasure = strings.TrimSpace(patch.UnitOfMeasure)
 	patch.CategoryIDs = uniqueStrings(patch.CategoryIDs)
+	if patch.MinOrderAmount != nil && patch.MinOrderAmount.MinorUnits == 0 {
+		patch.MinOrderAmount = nil
+	}
 	return patch
 }
 
 func validateProductPatch(patch ProductPatch, paths []string) error {
 	allowed := map[string]struct{}{
 		"name": {}, "description": {}, "price": {}, "availability": {}, "category_ids": {},
+		"unit_of_measure": {}, "min_order_quantity": {}, "min_order_amount": {},
 	}
 	if err := validateCatalogPaths(paths, allowed); err != nil {
 		return err
@@ -272,6 +284,26 @@ func validateProductPatch(patch ProductPatch, paths []string) error {
 	if containsPath(paths, "category_ids") {
 		if err := validateCategoryIDs(patch.CategoryIDs); err != nil {
 			return err
+		}
+	}
+	return validateProductOrderLimits(patch, paths)
+}
+
+const (
+	maxUnitOfMeasureBytes = 64
+	maxMinOrderQuantity   = 10_000
+)
+
+func validateProductOrderLimits(patch ProductPatch, paths []string) error {
+	if containsPath(paths, "unit_of_measure") && len(patch.UnitOfMeasure) > maxUnitOfMeasureBytes {
+		return apperror.Validation("patch.unit_of_measure", "must not exceed 64 bytes")
+	}
+	if containsPath(paths, "min_order_quantity") && patch.MinOrderQuantity > maxMinOrderQuantity {
+		return apperror.Validation("patch.min_order_quantity", "must not exceed 10000")
+	}
+	if containsPath(paths, "min_order_amount") && patch.MinOrderAmount != nil {
+		if patch.MinOrderAmount.MinorUnits < 1 || patch.MinOrderAmount.Currency != "RUB" {
+			return apperror.Validation("patch.min_order_amount", "must contain a positive RUB amount")
 		}
 	}
 	return nil

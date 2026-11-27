@@ -35,6 +35,10 @@ http:
     - selector: online_market.api.v1.OrderService.GetOrder
       post: /api/v1/orders:lookup
       body: "*"
+    - selector: online_market.api.v1.OrderService.ListDeliveryPlaces
+      get: /api/v1/delivery-places
+    - selector: online_market.api.v1.OrderService.ListDeliveryDays
+      get: /api/v1/delivery-days
 
     - selector: online_market.api.v1.AdminAuthService.Login
       post: /api/v1/admin/auth/login
@@ -91,3 +95,14 @@ http:
       body: "*"
     - selector: online_market.api.v1.AdminOrderService.ListOrderEvents
       get: /api/v1/admin/orders/{order_id}/events
+    - selector: online_market.api.v1.AdminOrderService.SetDeliveryDayLimit
+      post: /api/v1/admin/delivery-days
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.CreateDeliveryPlace
+      post: /api/v1/admin/delivery-places
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.UpdateDeliveryPlace
+      patch: /api/v1/admin/delivery-places/{place_id}
+      body: "*"
+    - selector: online_market.api.v1.AdminOrderService.DeleteDeliveryPlace
+      delete: /api/v1/admin/delivery-places/{place_id}

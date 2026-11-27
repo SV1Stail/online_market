@@ -18,6 +18,10 @@ service AdminOrderService {
   rpc RemoveOrderItem(RemoveOrderItemRequest) returns (RemoveOrderItemResponse);
   rpc ChangeOrderStatus(ChangeOrderStatusRequest) returns (ChangeOrderStatusResponse);
   rpc ListOrderEvents(ListOrderEventsRequest) returns (ListOrderEventsResponse);
+  rpc SetDeliveryDayLimit(SetDeliveryDayLimitRequest) returns (SetDeliveryDayLimitResponse);
+  rpc CreateDeliveryPlace(CreateDeliveryPlaceRequest) returns (CreateDeliveryPlaceResponse);
+  rpc UpdateDeliveryPlace(UpdateDeliveryPlaceRequest) returns (UpdateDeliveryPlaceResponse);
+  rpc DeleteDeliveryPlace(DeleteDeliveryPlaceRequest) returns (DeleteDeliveryPlaceResponse);
 }
 
 message AdminOrder {
@@ -161,3 +165,42 @@ message ListOrderEventsResponse {
   repeated OrderEvent events = 1;
   PageResponse page = 2;
 }
+
+message SetDeliveryDayLimitRequest {
+  string date = 1;
+  // Zero closes the day. The configured default applies only when a day has no saved limit.
+  uint32 delivery_limit = 2;
+}
+
+message SetDeliveryDayLimitResponse {
+  DeliveryDay day = 1;
+}
+
+message CreateDeliveryPlaceRequest {
+  string name = 1;
+  uint32 daily_limit = 2;
+  DeliveryScheduleKind schedule_kind = 3;
+  repeated string dates = 4;
+}
+
+message CreateDeliveryPlaceResponse {
+  DeliveryPlace place = 1;
+}
+
+message UpdateDeliveryPlaceRequest {
+  string place_id = 1;
+  string name = 2;
+  uint32 daily_limit = 3;
+  DeliveryScheduleKind schedule_kind = 4;
+  repeated string dates = 5;
+}
+
+message UpdateDeliveryPlaceResponse {
+  DeliveryPlace place = 1;
+}
+
+message DeleteDeliveryPlaceRequest {
+  string place_id = 1;
+}
+
+message DeleteDeliveryPlaceResponse {}

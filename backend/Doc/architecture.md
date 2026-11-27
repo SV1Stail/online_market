@@ -65,7 +65,7 @@ new -> confirmed -> assembling -> ready -> in_delivery -> completed
  +--------+-------------+----------+------------------------> cancelled
 ```
 
-A ready pickup order can transition directly to `completed`. Completed and
+A ready order can transition directly to `completed`. Completed and
 cancelled orders are terminal and cannot be edited. An order already in
 delivery cannot be cancelled through the MVP workflow.
 

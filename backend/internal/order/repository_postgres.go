@@ -20,11 +20,13 @@ import (
 )
 
 type PostgresRepository struct {
-	pool *pgxpool.Pool
+	pool          *pgxpool.Pool
+	dailyLimit    int
+	minOrderMinor int64
 }
 
-func NewPostgresRepository(pool *pgxpool.Pool) *PostgresRepository {
-	return &PostgresRepository{pool: pool}
+func NewPostgresRepository(pool *pgxpool.Pool, dailyLimit int, minOrderMinor int64) *PostgresRepository {
+	return &PostgresRepository{pool: pool, dailyLimit: dailyLimit, minOrderMinor: minOrderMinor}
 }
 
 func (r *PostgresRepository) Create(ctx context.Context, command CheckoutCommand) (*Order, error) {
@@ -99,6 +101,12 @@ func (r *PostgresRepository) Create(ctx context.Context, command CheckoutCommand
 	if len(items) == 0 {
 		return nil, fmt.Errorf("%w: cart is empty", apperror.ErrPrecondition)
 	}
+	if err := CheckOrderMinimum(total, r.minOrderMinor); err != nil {
+		return nil, err
+	}
+	if err := r.reserveDeliverySlot(ctx, tx, command.Delivery.City, command.Delivery.Date); err != nil {
+		return nil, err
+	}
 
 	orderName := "Заказ " + command.OrderNumber
 	_, err = tx.Exec(ctx, `
@@ -106,22 +114,23 @@ func (r *PostgresRepository) Create(ctx context.Context, command CheckoutCommand
 			id, number, name, cart_id, order_token_hash,
 			checkout_idempotency_key, checkout_request_hash,
 			customer_full_name, customer_phone, customer_email,
-			delivery_method, delivery_city, delivery_address, delivery_comment,
+			delivery_method, delivery_city, delivery_address, delivery_comment, delivery_date,
 			customer_comment, status, total_minor_units, currency_code,
 			version, created_at, updated_at
 		) VALUES (
 			$1::uuid, $2, $3, $4::uuid, $5,
 			$6, $7,
 			$8, $9, $10,
-			$11, $12, $13, $14,
-			$15, 'new', $16, $17,
-			1, $18, $18
+			$11, $12, $13, $14, $15::date,
+			$16, 'new', $17, $18,
+			1, $19, $19
 		)
 	`,
 		command.OrderID, command.OrderNumber, orderName, command.CartID, command.OrderTokenHash,
 		command.IdempotencyKey, command.RequestHash,
 		command.Customer.FullName, command.Customer.Phone, command.Customer.Email,
 		command.Delivery.Method, command.Delivery.City, command.Delivery.Address, command.Delivery.Comment,
+		FormatDeliveryDate(command.Delivery.Date),
 		command.CustomerComment, total.MinorUnits, total.Currency, command.CreatedAt,
 	)
 	if err != nil {
@@ -132,12 +141,12 @@ func (r *PostgresRepository) Create(ctx context.Context, command CheckoutCommand
 			INSERT INTO order_items (
 				id, order_id, product_id, product_name,
 				unit_price_minor_units, currency_code, quantity,
-				line_total_minor_units, created_at, updated_at
-			) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $9)
+				line_total_minor_units, unit_of_measure, created_at, updated_at
+			) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $10)
 		`,
 			item.ID, command.OrderID, item.ProductID, item.ProductName,
 			item.UnitPrice.MinorUnits, item.UnitPrice.Currency, item.Quantity,
-			item.LineTotal.MinorUnits, command.CreatedAt,
+			item.LineTotal.MinorUnits, item.UnitOfMeasure, command.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("insert order item: %w", err)
@@ -187,7 +196,8 @@ type checkoutItemsResult struct {
 
 func loadCheckoutItems(ctx context.Context, tx pgx.Tx, cartID, currency string, now time.Time) (*checkoutItemsResult, error) {
 	rows, err := tx.Query(ctx, `
-		SELECT p.id::text, p.name, p.price_minor_units, p.currency_code, p.availability, ci.quantity
+		SELECT p.id::text, p.name, p.price_minor_units, p.currency_code, p.availability, ci.quantity,
+			p.unit_of_measure, p.min_order_quantity, p.min_order_amount_minor_units
 		FROM cart_items ci
 		JOIN products p ON p.id = ci.product_id
 		WHERE ci.cart_id = $1::uuid
@@ -208,7 +218,12 @@ func loadCheckoutItems(ctx context.Context, tx pgx.Tx, cartID, currency string, 
 		var minorUnits int64
 		var itemCurrency string
 		var availability catalog.Availability
-		if err := rows.Scan(&item.ProductID, &item.ProductName, &minorUnits, &itemCurrency, &availability, &item.Quantity); err != nil {
+		var minQuantity int32
+		var minAmount sql.NullInt64
+		if err := rows.Scan(
+			&item.ProductID, &item.ProductName, &minorUnits, &itemCurrency, &availability, &item.Quantity,
+			&item.UnitOfMeasure, &minQuantity, &minAmount,
+		); err != nil {
 			return nil, fmt.Errorf("scan checkout item: %w", err)
 		}
 		if availability != catalog.AvailabilityAvailable {
@@ -216,6 +231,9 @@ func loadCheckoutItems(ctx context.Context, tx pgx.Tx, cartID, currency string, 
 		}
 		if itemCurrency != currency {
 			return nil, fmt.Errorf("%w: product currency differs from cart currency", apperror.ErrPrecondition)
+		}
+		if minQuantity < 0 {
+			return nil, fmt.Errorf("invalid stored minimum order quantity")
 		}
 		item.ID, err = identifier.NewUUID()
 		if err != nil {
@@ -228,6 +246,17 @@ func loadCheckoutItems(ctx context.Context, tx pgx.Tx, cartID, currency string, 
 		item.LineTotal, err = item.UnitPrice.Multiply(item.Quantity)
 		if err != nil {
 			return nil, fmt.Errorf("calculate item total: %w", err)
+		}
+		var minimumAmount *money.Money
+		if minAmount.Valid {
+			amount, err := money.New(minAmount.Int64, itemCurrency)
+			if err != nil {
+				return nil, fmt.Errorf("invalid stored minimum order amount: %w", err)
+			}
+			minimumAmount = &amount
+		}
+		if err := CheckLineMinimum(item.ProductName, item.Quantity, item.LineTotal, uint32(minQuantity), minimumAmount); err != nil {
+			return nil, err
 		}
 		total, err = total.Add(item.LineTotal)
 		if err != nil {
@@ -245,10 +274,11 @@ func loadCheckoutItems(ctx context.Context, tx pgx.Tx, cartID, currency string, 
 
 func enqueueCreatedNotifications(ctx context.Context, tx pgx.Tx, command CheckoutCommand, total money.Money) error {
 	text := fmt.Sprintf(
-		"Новый заказ %s\nПокупатель: %s\nТелефон: %s\nСумма: %d %s",
+		"Новый заказ %s\nПокупатель: %s\nТелефон: %s\nДоставка: %s\nСумма: %d %s",
 		command.OrderNumber,
 		command.Customer.FullName,
 		command.Customer.Phone,
+		FormatDeliveryDate(command.Delivery.Date),
 		total.MinorUnits,
 		total.Currency,
 	)
@@ -285,11 +315,12 @@ func loadOrder(ctx context.Context, query orderQuerier, orderID, number string, 
 	var totalMinor int64
 	var currency string
 	var assignedAdminID sql.NullString
+	var deliveryDate time.Time
 	row := query.QueryRow(ctx, `
 		SELECT
 			id::text, number, name, cart_id::text,
 			customer_full_name, customer_phone, customer_email,
-			delivery_method, delivery_city, delivery_address, delivery_comment,
+			delivery_method, delivery_city, delivery_address, delivery_comment, delivery_date,
 			customer_comment, internal_comment, assigned_admin_id::text,
 			status, total_minor_units, currency_code, version, created_at, updated_at
 		FROM orders
@@ -299,7 +330,7 @@ func loadOrder(ctx context.Context, query orderQuerier, orderID, number string, 
 	err := row.Scan(
 		&result.ID, &result.Number, &result.Name, &result.CartID,
 		&result.Customer.FullName, &result.Customer.Phone, &result.Customer.Email,
-		&result.Delivery.Method, &result.Delivery.City, &result.Delivery.Address, &result.Delivery.Comment,
+		&result.Delivery.Method, &result.Delivery.City, &result.Delivery.Address, &result.Delivery.Comment, &deliveryDate,
 		&result.CustomerComment, &result.InternalComment, &assignedAdminID,
 		&result.Status, &totalMinor, &currency, &result.Version, &result.CreatedAt, &result.UpdatedAt,
 	)
@@ -315,6 +346,7 @@ func loadOrder(ctx context.Context, query orderQuerier, orderID, number string, 
 	if assignedAdminID.Valid {
 		result.AssignedAdminID = assignedAdminID.String
 	}
+	result.Delivery.Date = time.Date(deliveryDate.UTC().Year(), deliveryDate.UTC().Month(), deliveryDate.UTC().Day(), 0, 0, 0, 0, time.UTC)
 	result.Total, err = money.New(totalMinor, currency)
 	if err != nil {
 		return nil, fmt.Errorf("invalid stored order total: %w", err)
@@ -323,7 +355,7 @@ func loadOrder(ctx context.Context, query orderQuerier, orderID, number string, 
 	rows, err := query.Query(ctx, `
 		SELECT id::text, COALESCE(product_id::text, ''), product_name,
 			unit_price_minor_units, currency_code, quantity,
-			line_total_minor_units, created_at, updated_at
+			line_total_minor_units, unit_of_measure, created_at, updated_at
 		FROM order_items
 		WHERE order_id = $1::uuid
 		ORDER BY created_at, id
@@ -341,7 +373,7 @@ func loadOrder(ctx context.Context, query orderQuerier, orderID, number string, 
 		if err := rows.Scan(
 			&item.ID, &item.ProductID, &item.ProductName,
 			&unitMinor, &itemCurrency, &item.Quantity,
-			&lineMinor, &item.CreatedAt, &item.UpdatedAt,
+			&lineMinor, &item.UnitOfMeasure, &item.CreatedAt, &item.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan order item: %w", err)
 		}
@@ -359,6 +391,27 @@ func loadOrder(ctx context.Context, query orderQuerier, orderID, number string, 
 		return nil, fmt.Errorf("iterate order items: %w", err)
 	}
 	return &result, nil
+}
+
+func (r *PostgresRepository) SetDeliveryDayLimit(ctx context.Context, date time.Time, limit int) (DeliveryDay, error) {
+	key := FormatDeliveryDate(date)
+	if _, err := r.pool.Exec(ctx, `
+		INSERT INTO delivery_day_limits (delivery_date, delivery_limit)
+		VALUES ($1::date, $2)
+		ON CONFLICT (delivery_date) DO UPDATE
+		SET delivery_limit = EXCLUDED.delivery_limit, updated_at = CURRENT_TIMESTAMP
+	`, key, limit); err != nil {
+		return DeliveryDay{}, fmt.Errorf("save delivery day limit: %w", err)
+	}
+	var booked int
+	if err := r.pool.QueryRow(ctx, `
+		SELECT COUNT(*)
+		FROM orders
+		WHERE delivery_date = $1::date AND status <> 'cancelled'
+	`, key).Scan(&booked); err != nil {
+		return DeliveryDay{}, fmt.Errorf("count delivery day orders: %w", err)
+	}
+	return DeliveryDay{Date: date, Booked: booked, Limit: limit}, nil
 }
 
 func nullableUUID(value string) any {

@@ -2,10 +2,12 @@ package grpcapi
 
 import (
 	"fmt"
+	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	marketv1 "github.com/SV1Stail/online_market/gen/online_market/v1"
+	"github.com/SV1Stail/online_market/internal/apperror"
 	"github.com/SV1Stail/online_market/internal/auth"
 	"github.com/SV1Stail/online_market/internal/cart"
 	"github.com/SV1Stail/online_market/internal/catalog"
@@ -28,17 +30,27 @@ func moneyFromProto(value *marketv1.Money) (*money.Money, error) {
 	return &result, nil
 }
 
+func optionalMoneyToProto(value *money.Money) *marketv1.Money {
+	if value == nil {
+		return nil
+	}
+	return moneyToProto(*value)
+}
+
 func productToProto(value catalog.Product) *marketv1.Product {
 	return &marketv1.Product{
-		Id:           value.ID,
-		Name:         value.Name,
-		Description:  value.Description,
-		Price:        moneyToProto(value.Price),
-		Availability: availabilityToProto(value.Availability),
-		CategoryIds:  append([]string(nil), value.CategoryIDs...),
-		CreatedAt:    timestamppb.New(value.CreatedAt),
-		UpdatedAt:    timestamppb.New(value.UpdatedAt),
-		Version:      value.Version,
+		Id:               value.ID,
+		Name:             value.Name,
+		Description:      value.Description,
+		Price:            moneyToProto(value.Price),
+		Availability:     availabilityToProto(value.Availability),
+		CategoryIds:      append([]string(nil), value.CategoryIDs...),
+		CreatedAt:        timestamppb.New(value.CreatedAt),
+		UpdatedAt:        timestamppb.New(value.UpdatedAt),
+		Version:          value.Version,
+		UnitOfMeasure:    value.UnitOfMeasure,
+		MinOrderQuantity: value.MinOrderQuantity,
+		MinOrderAmount:   optionalMoneyToProto(value.MinOrderAmount),
 	}
 }
 
@@ -79,13 +91,16 @@ func cartToProto(value *cart.Cart) *marketv1.Cart {
 	items := make([]*marketv1.CartItem, 0, len(value.Items))
 	for _, item := range value.Items {
 		items = append(items, &marketv1.CartItem{
-			Id:           item.ID,
-			ProductId:    item.ProductID,
-			ProductName:  item.ProductName,
-			UnitPrice:    moneyToProto(item.UnitPrice),
-			Quantity:     item.Quantity,
-			LineTotal:    moneyToProto(item.LineTotal),
-			Availability: availabilityToProto(item.Availability),
+			Id:               item.ID,
+			ProductId:        item.ProductID,
+			ProductName:      item.ProductName,
+			UnitPrice:        moneyToProto(item.UnitPrice),
+			Quantity:         item.Quantity,
+			LineTotal:        moneyToProto(item.LineTotal),
+			Availability:     availabilityToProto(item.Availability),
+			UnitOfMeasure:    item.UnitOfMeasure,
+			MinOrderQuantity: item.MinOrderQuantity,
+			MinOrderAmount:   optionalMoneyToProto(item.MinOrderAmount),
 		})
 	}
 	return &marketv1.Cart{
@@ -117,12 +132,13 @@ func orderToProto(value *order.Order) *marketv1.Order {
 	items := make([]*marketv1.OrderItem, 0, len(value.Items))
 	for _, item := range value.Items {
 		items = append(items, &marketv1.OrderItem{
-			Id:          item.ID,
-			ProductId:   item.ProductID,
-			ProductName: item.ProductName,
-			UnitPrice:   moneyToProto(item.UnitPrice),
-			Quantity:    item.Quantity,
-			LineTotal:   moneyToProto(item.LineTotal),
+			Id:            item.ID,
+			ProductId:     item.ProductID,
+			ProductName:   item.ProductName,
+			UnitPrice:     moneyToProto(item.UnitPrice),
+			Quantity:      item.Quantity,
+			LineTotal:     moneyToProto(item.LineTotal),
+			UnitOfMeasure: item.UnitOfMeasure,
 		})
 	}
 	return &marketv1.Order{
@@ -162,20 +178,96 @@ func customerFromProto(value *marketv1.CustomerContact) order.Customer {
 
 func deliveryToProto(value order.Delivery) *marketv1.DeliveryDetails {
 	return &marketv1.DeliveryDetails{
-		Method:  deliveryMethodToProto(value.Method),
-		City:    value.City,
-		Address: value.Address,
-		Comment: value.Comment,
+		Method:       deliveryMethodToProto(value.Method),
+		City:         value.City,
+		Address:      value.Address,
+		Comment:      value.Comment,
+		DeliveryDate: order.FormatDeliveryDate(value.Date),
 	}
 }
 
-func deliveryFromProto(value *marketv1.DeliveryDetails) order.Delivery {
+func deliveryFromProto(value *marketv1.DeliveryDetails) (order.Delivery, error) {
 	if value == nil {
-		return order.Delivery{}
+		return order.Delivery{}, nil
+	}
+	date, err := order.ParseDeliveryDate(value.GetDeliveryDate())
+	if err != nil {
+		return order.Delivery{}, err
 	}
 	return order.Delivery{
 		Method: deliveryMethodFromProto(value.GetMethod()),
 		City:   value.GetCity(), Address: value.GetAddress(), Comment: value.GetComment(),
+		Date: date,
+	}, nil
+}
+
+func deliveryPlaceToProto(value order.DeliveryPlace) *marketv1.DeliveryPlace {
+	dates := make([]string, 0, len(value.Dates))
+	for _, date := range value.Dates {
+		dates = append(dates, order.FormatDeliveryDate(date))
+	}
+	return &marketv1.DeliveryPlace{
+		Id:           value.ID,
+		Name:         value.Name,
+		DailyLimit:   uint32(value.DailyLimit),
+		ScheduleKind: scheduleKindToProto(value.ScheduleKind),
+		Dates:        dates,
+	}
+}
+
+func deliveryPlaceFromInput(name string, limit uint32, kind marketv1.DeliveryScheduleKind, rawDates []string) (order.DeliveryPlace, error) {
+	schedule, err := scheduleKindFromProto(kind)
+	if err != nil {
+		return order.DeliveryPlace{}, err
+	}
+	dates := make([]time.Time, 0, len(rawDates))
+	for _, raw := range rawDates {
+		parsed, err := order.ParseDeliveryDate(raw)
+		if err != nil || parsed.IsZero() {
+			return order.DeliveryPlace{}, apperror.Validation("dates", "must use YYYY-MM-DD")
+		}
+		dates = append(dates, parsed)
+	}
+	return order.DeliveryPlace{
+		Name:         name,
+		DailyLimit:   int(limit),
+		ScheduleKind: schedule,
+		Dates:        dates,
+	}, nil
+}
+
+func scheduleKindToProto(kind string) marketv1.DeliveryScheduleKind {
+	switch kind {
+	case order.ScheduleAll:
+		return marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_ALL
+	case order.ScheduleWeekdays:
+		return marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_WEEKDAYS
+	case order.ScheduleDates:
+		return marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_DATES
+	default:
+		return marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_UNSPECIFIED
+	}
+}
+
+func scheduleKindFromProto(kind marketv1.DeliveryScheduleKind) (string, error) {
+	switch kind {
+	case marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_ALL:
+		return order.ScheduleAll, nil
+	case marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_WEEKDAYS:
+		return order.ScheduleWeekdays, nil
+	case marketv1.DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_DATES:
+		return order.ScheduleDates, nil
+	default:
+		return "", apperror.Validation("schedule_kind", "is required")
+	}
+}
+
+func deliveryDayToProto(value order.DeliveryDay) *marketv1.DeliveryDay {
+	return &marketv1.DeliveryDay{
+		Date:          order.FormatDeliveryDate(value.Date),
+		Booked:        uint32(value.Booked),
+		DeliveryLimit: uint32(value.Limit),
+		Remaining:     uint32(value.Remaining()),
 	}
 }
 

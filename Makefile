@@ -95,7 +95,7 @@ backend-local-up: docker-tools-check local-env-check
 	@echo "gRPC UI:  http://127.0.0.1:8081 (or GRPCUI_PORT from $(LOCAL_ENV))"
 
 backend-local-down: docker-tools-check local-env-check
-	$(LOCAL_COMPOSE) down
+	$(LOCAL_COMPOSE) down --volumes
 
 backend-local-logs: docker-tools-check local-env-check
 	$(LOCAL_COMPOSE) logs --follow api grpc-ui

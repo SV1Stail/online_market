@@ -1383,6 +1383,415 @@ func (x *ListOrderEventsResponse) GetPage() *PageResponse {
 	return nil
 }
 
+type SetDeliveryDayLimitRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Date  string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	// Zero closes the day. The configured default applies only when a day has no saved limit.
+	DeliveryLimit uint32 `protobuf:"varint,2,opt,name=delivery_limit,json=deliveryLimit,proto3" json:"delivery_limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetDeliveryDayLimitRequest) Reset() {
+	*x = SetDeliveryDayLimitRequest{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetDeliveryDayLimitRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetDeliveryDayLimitRequest) ProtoMessage() {}
+
+func (x *SetDeliveryDayLimitRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetDeliveryDayLimitRequest.ProtoReflect.Descriptor instead.
+func (*SetDeliveryDayLimitRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *SetDeliveryDayLimitRequest) GetDate() string {
+	if x != nil {
+		return x.Date
+	}
+	return ""
+}
+
+func (x *SetDeliveryDayLimitRequest) GetDeliveryLimit() uint32 {
+	if x != nil {
+		return x.DeliveryLimit
+	}
+	return 0
+}
+
+type SetDeliveryDayLimitResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Day           *DeliveryDay           `protobuf:"bytes,1,opt,name=day,proto3" json:"day,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetDeliveryDayLimitResponse) Reset() {
+	*x = SetDeliveryDayLimitResponse{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetDeliveryDayLimitResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetDeliveryDayLimitResponse) ProtoMessage() {}
+
+func (x *SetDeliveryDayLimitResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetDeliveryDayLimitResponse.ProtoReflect.Descriptor instead.
+func (*SetDeliveryDayLimitResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *SetDeliveryDayLimitResponse) GetDay() *DeliveryDay {
+	if x != nil {
+		return x.Day
+	}
+	return nil
+}
+
+type CreateDeliveryPlaceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	DailyLimit    uint32                 `protobuf:"varint,2,opt,name=daily_limit,json=dailyLimit,proto3" json:"daily_limit,omitempty"`
+	ScheduleKind  DeliveryScheduleKind   `protobuf:"varint,3,opt,name=schedule_kind,json=scheduleKind,proto3,enum=online_market.api.v1.DeliveryScheduleKind" json:"schedule_kind,omitempty"`
+	Dates         []string               `protobuf:"bytes,4,rep,name=dates,proto3" json:"dates,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateDeliveryPlaceRequest) Reset() {
+	*x = CreateDeliveryPlaceRequest{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateDeliveryPlaceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDeliveryPlaceRequest) ProtoMessage() {}
+
+func (x *CreateDeliveryPlaceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDeliveryPlaceRequest.ProtoReflect.Descriptor instead.
+func (*CreateDeliveryPlaceRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *CreateDeliveryPlaceRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateDeliveryPlaceRequest) GetDailyLimit() uint32 {
+	if x != nil {
+		return x.DailyLimit
+	}
+	return 0
+}
+
+func (x *CreateDeliveryPlaceRequest) GetScheduleKind() DeliveryScheduleKind {
+	if x != nil {
+		return x.ScheduleKind
+	}
+	return DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_UNSPECIFIED
+}
+
+func (x *CreateDeliveryPlaceRequest) GetDates() []string {
+	if x != nil {
+		return x.Dates
+	}
+	return nil
+}
+
+type CreateDeliveryPlaceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Place         *DeliveryPlace         `protobuf:"bytes,1,opt,name=place,proto3" json:"place,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateDeliveryPlaceResponse) Reset() {
+	*x = CreateDeliveryPlaceResponse{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateDeliveryPlaceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDeliveryPlaceResponse) ProtoMessage() {}
+
+func (x *CreateDeliveryPlaceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDeliveryPlaceResponse.ProtoReflect.Descriptor instead.
+func (*CreateDeliveryPlaceResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *CreateDeliveryPlaceResponse) GetPlace() *DeliveryPlace {
+	if x != nil {
+		return x.Place
+	}
+	return nil
+}
+
+type UpdateDeliveryPlaceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PlaceId       string                 `protobuf:"bytes,1,opt,name=place_id,json=placeId,proto3" json:"place_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	DailyLimit    uint32                 `protobuf:"varint,3,opt,name=daily_limit,json=dailyLimit,proto3" json:"daily_limit,omitempty"`
+	ScheduleKind  DeliveryScheduleKind   `protobuf:"varint,4,opt,name=schedule_kind,json=scheduleKind,proto3,enum=online_market.api.v1.DeliveryScheduleKind" json:"schedule_kind,omitempty"`
+	Dates         []string               `protobuf:"bytes,5,rep,name=dates,proto3" json:"dates,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDeliveryPlaceRequest) Reset() {
+	*x = UpdateDeliveryPlaceRequest{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDeliveryPlaceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDeliveryPlaceRequest) ProtoMessage() {}
+
+func (x *UpdateDeliveryPlaceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDeliveryPlaceRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDeliveryPlaceRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *UpdateDeliveryPlaceRequest) GetPlaceId() string {
+	if x != nil {
+		return x.PlaceId
+	}
+	return ""
+}
+
+func (x *UpdateDeliveryPlaceRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateDeliveryPlaceRequest) GetDailyLimit() uint32 {
+	if x != nil {
+		return x.DailyLimit
+	}
+	return 0
+}
+
+func (x *UpdateDeliveryPlaceRequest) GetScheduleKind() DeliveryScheduleKind {
+	if x != nil {
+		return x.ScheduleKind
+	}
+	return DeliveryScheduleKind_DELIVERY_SCHEDULE_KIND_UNSPECIFIED
+}
+
+func (x *UpdateDeliveryPlaceRequest) GetDates() []string {
+	if x != nil {
+		return x.Dates
+	}
+	return nil
+}
+
+type UpdateDeliveryPlaceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Place         *DeliveryPlace         `protobuf:"bytes,1,opt,name=place,proto3" json:"place,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateDeliveryPlaceResponse) Reset() {
+	*x = UpdateDeliveryPlaceResponse{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateDeliveryPlaceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDeliveryPlaceResponse) ProtoMessage() {}
+
+func (x *UpdateDeliveryPlaceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDeliveryPlaceResponse.ProtoReflect.Descriptor instead.
+func (*UpdateDeliveryPlaceResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *UpdateDeliveryPlaceResponse) GetPlace() *DeliveryPlace {
+	if x != nil {
+		return x.Place
+	}
+	return nil
+}
+
+type DeleteDeliveryPlaceRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PlaceId       string                 `protobuf:"bytes,1,opt,name=place_id,json=placeId,proto3" json:"place_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDeliveryPlaceRequest) Reset() {
+	*x = DeleteDeliveryPlaceRequest{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDeliveryPlaceRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDeliveryPlaceRequest) ProtoMessage() {}
+
+func (x *DeleteDeliveryPlaceRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDeliveryPlaceRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDeliveryPlaceRequest) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *DeleteDeliveryPlaceRequest) GetPlaceId() string {
+	if x != nil {
+		return x.PlaceId
+	}
+	return ""
+}
+
+type DeleteDeliveryPlaceResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDeliveryPlaceResponse) Reset() {
+	*x = DeleteDeliveryPlaceResponse{}
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDeliveryPlaceResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDeliveryPlaceResponse) ProtoMessage() {}
+
+func (x *DeleteDeliveryPlaceResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_online_market_v1_admin_order_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDeliveryPlaceResponse.ProtoReflect.Descriptor instead.
+func (*DeleteDeliveryPlaceResponse) Descriptor() ([]byte, []int) {
+	return file_online_market_v1_admin_order_proto_rawDescGZIP(), []int{29}
+}
+
 var File_online_market_v1_admin_order_proto protoreflect.FileDescriptor
 
 const file_online_market_v1_admin_order_proto_rawDesc = "" +
@@ -1482,7 +1891,32 @@ const file_online_market_v1_admin_order_proto_rawDesc = "" +
 	"\x04page\x18\x02 \x01(\v2!.online_market.api.v1.PageRequestR\x04page\"\x8b\x01\n" +
 	"\x17ListOrderEventsResponse\x128\n" +
 	"\x06events\x18\x01 \x03(\v2 .online_market.api.v1.OrderEventR\x06events\x126\n" +
-	"\x04page\x18\x02 \x01(\v2\".online_market.api.v1.PageResponseR\x04page*\x82\x02\n" +
+	"\x04page\x18\x02 \x01(\v2\".online_market.api.v1.PageResponseR\x04page\"W\n" +
+	"\x1aSetDeliveryDayLimitRequest\x12\x12\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\x12%\n" +
+	"\x0edelivery_limit\x18\x02 \x01(\rR\rdeliveryLimit\"R\n" +
+	"\x1bSetDeliveryDayLimitResponse\x123\n" +
+	"\x03day\x18\x01 \x01(\v2!.online_market.api.v1.DeliveryDayR\x03day\"\xb8\x01\n" +
+	"\x1aCreateDeliveryPlaceRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
+	"\vdaily_limit\x18\x02 \x01(\rR\n" +
+	"dailyLimit\x12O\n" +
+	"\rschedule_kind\x18\x03 \x01(\x0e2*.online_market.api.v1.DeliveryScheduleKindR\fscheduleKind\x12\x14\n" +
+	"\x05dates\x18\x04 \x03(\tR\x05dates\"X\n" +
+	"\x1bCreateDeliveryPlaceResponse\x129\n" +
+	"\x05place\x18\x01 \x01(\v2#.online_market.api.v1.DeliveryPlaceR\x05place\"\xd3\x01\n" +
+	"\x1aUpdateDeliveryPlaceRequest\x12\x19\n" +
+	"\bplace_id\x18\x01 \x01(\tR\aplaceId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
+	"\vdaily_limit\x18\x03 \x01(\rR\n" +
+	"dailyLimit\x12O\n" +
+	"\rschedule_kind\x18\x04 \x01(\x0e2*.online_market.api.v1.DeliveryScheduleKindR\fscheduleKind\x12\x14\n" +
+	"\x05dates\x18\x05 \x03(\tR\x05dates\"X\n" +
+	"\x1bUpdateDeliveryPlaceResponse\x129\n" +
+	"\x05place\x18\x01 \x01(\v2#.online_market.api.v1.DeliveryPlaceR\x05place\"7\n" +
+	"\x1aDeleteDeliveryPlaceRequest\x12\x19\n" +
+	"\bplace_id\x18\x01 \x01(\tR\aplaceId\"\x1d\n" +
+	"\x1bDeleteDeliveryPlaceResponse*\x82\x02\n" +
 	"\x0eOrderEventType\x12 \n" +
 	"\x1cORDER_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18ORDER_EVENT_TYPE_CREATED\x10\x01\x12$\n" +
@@ -1490,7 +1924,8 @@ const file_online_market_v1_admin_order_proto_rawDesc = "" +
 	"\x1bORDER_EVENT_TYPE_ITEM_ADDED\x10\x03\x12!\n" +
 	"\x1dORDER_EVENT_TYPE_ITEM_CHANGED\x10\x04\x12!\n" +
 	"\x1dORDER_EVENT_TYPE_ITEM_REMOVED\x10\x05\x12#\n" +
-	"\x1fORDER_EVENT_TYPE_STATUS_CHANGED\x10\x062\x89\a\n" +
+	"\x1fORDER_EVENT_TYPE_STATUS_CHANGED\x10\x062\xf9\n" +
+	"\n" +
 	"\x11AdminOrderService\x12i\n" +
 	"\n" +
 	"ListOrders\x12,.online_market.api.v1.ListAdminOrdersRequest\x1a-.online_market.api.v1.ListAdminOrdersResponse\x12c\n" +
@@ -1500,7 +1935,11 @@ const file_online_market_v1_admin_order_proto_rawDesc = "" +
 	"\x0fUpdateOrderItem\x12,.online_market.api.v1.UpdateOrderItemRequest\x1a-.online_market.api.v1.UpdateOrderItemResponse\x12n\n" +
 	"\x0fRemoveOrderItem\x12,.online_market.api.v1.RemoveOrderItemRequest\x1a-.online_market.api.v1.RemoveOrderItemResponse\x12t\n" +
 	"\x11ChangeOrderStatus\x12..online_market.api.v1.ChangeOrderStatusRequest\x1a/.online_market.api.v1.ChangeOrderStatusResponse\x12n\n" +
-	"\x0fListOrderEvents\x12,.online_market.api.v1.ListOrderEventsRequest\x1a-.online_market.api.v1.ListOrderEventsResponseBAZ?github.com/SV1Stail/online_market/gen/online_market/v1;marketv1b\x06proto3"
+	"\x0fListOrderEvents\x12,.online_market.api.v1.ListOrderEventsRequest\x1a-.online_market.api.v1.ListOrderEventsResponse\x12z\n" +
+	"\x13SetDeliveryDayLimit\x120.online_market.api.v1.SetDeliveryDayLimitRequest\x1a1.online_market.api.v1.SetDeliveryDayLimitResponse\x12z\n" +
+	"\x13CreateDeliveryPlace\x120.online_market.api.v1.CreateDeliveryPlaceRequest\x1a1.online_market.api.v1.CreateDeliveryPlaceResponse\x12z\n" +
+	"\x13UpdateDeliveryPlace\x120.online_market.api.v1.UpdateDeliveryPlaceRequest\x1a1.online_market.api.v1.UpdateDeliveryPlaceResponse\x12z\n" +
+	"\x13DeleteDeliveryPlace\x120.online_market.api.v1.DeleteDeliveryPlaceRequest\x1a1.online_market.api.v1.DeleteDeliveryPlaceResponseBAZ?github.com/SV1Stail/online_market/gen/online_market/v1;marketv1b\x06proto3"
 
 var (
 	file_online_market_v1_admin_order_proto_rawDescOnce sync.Once
@@ -1515,92 +1954,116 @@ func file_online_market_v1_admin_order_proto_rawDescGZIP() []byte {
 }
 
 var file_online_market_v1_admin_order_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_online_market_v1_admin_order_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_online_market_v1_admin_order_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_online_market_v1_admin_order_proto_goTypes = []any{
-	(OrderEventType)(0),                // 0: online_market.api.v1.OrderEventType
-	(*AdminOrder)(nil),                 // 1: online_market.api.v1.AdminOrder
-	(*OrderListFilter)(nil),            // 2: online_market.api.v1.OrderListFilter
-	(*ListAdminOrdersRequest)(nil),     // 3: online_market.api.v1.ListAdminOrdersRequest
-	(*ListAdminOrdersResponse)(nil),    // 4: online_market.api.v1.ListAdminOrdersResponse
-	(*GetAdminOrderRequest)(nil),       // 5: online_market.api.v1.GetAdminOrderRequest
-	(*GetAdminOrderResponse)(nil),      // 6: online_market.api.v1.GetAdminOrderResponse
-	(*OrderDetailsPatch)(nil),          // 7: online_market.api.v1.OrderDetailsPatch
-	(*UpdateOrderDetailsRequest)(nil),  // 8: online_market.api.v1.UpdateOrderDetailsRequest
-	(*UpdateOrderDetailsResponse)(nil), // 9: online_market.api.v1.UpdateOrderDetailsResponse
-	(*AddOrderItemRequest)(nil),        // 10: online_market.api.v1.AddOrderItemRequest
-	(*AddOrderItemResponse)(nil),       // 11: online_market.api.v1.AddOrderItemResponse
-	(*OrderItemPatch)(nil),             // 12: online_market.api.v1.OrderItemPatch
-	(*UpdateOrderItemRequest)(nil),     // 13: online_market.api.v1.UpdateOrderItemRequest
-	(*UpdateOrderItemResponse)(nil),    // 14: online_market.api.v1.UpdateOrderItemResponse
-	(*RemoveOrderItemRequest)(nil),     // 15: online_market.api.v1.RemoveOrderItemRequest
-	(*RemoveOrderItemResponse)(nil),    // 16: online_market.api.v1.RemoveOrderItemResponse
-	(*ChangeOrderStatusRequest)(nil),   // 17: online_market.api.v1.ChangeOrderStatusRequest
-	(*ChangeOrderStatusResponse)(nil),  // 18: online_market.api.v1.ChangeOrderStatusResponse
-	(*OrderFieldChange)(nil),           // 19: online_market.api.v1.OrderFieldChange
-	(*OrderEvent)(nil),                 // 20: online_market.api.v1.OrderEvent
-	(*ListOrderEventsRequest)(nil),     // 21: online_market.api.v1.ListOrderEventsRequest
-	(*ListOrderEventsResponse)(nil),    // 22: online_market.api.v1.ListOrderEventsResponse
-	(*Order)(nil),                      // 23: online_market.api.v1.Order
-	(OrderStatus)(0),                   // 24: online_market.api.v1.OrderStatus
-	(*timestamppb.Timestamp)(nil),      // 25: google.protobuf.Timestamp
-	(*PageRequest)(nil),                // 26: online_market.api.v1.PageRequest
-	(*PageResponse)(nil),               // 27: online_market.api.v1.PageResponse
-	(*CustomerContact)(nil),            // 28: online_market.api.v1.CustomerContact
-	(*DeliveryDetails)(nil),            // 29: online_market.api.v1.DeliveryDetails
-	(*fieldmaskpb.FieldMask)(nil),      // 30: google.protobuf.FieldMask
-	(*Money)(nil),                      // 31: online_market.api.v1.Money
+	(OrderEventType)(0),                 // 0: online_market.api.v1.OrderEventType
+	(*AdminOrder)(nil),                  // 1: online_market.api.v1.AdminOrder
+	(*OrderListFilter)(nil),             // 2: online_market.api.v1.OrderListFilter
+	(*ListAdminOrdersRequest)(nil),      // 3: online_market.api.v1.ListAdminOrdersRequest
+	(*ListAdminOrdersResponse)(nil),     // 4: online_market.api.v1.ListAdminOrdersResponse
+	(*GetAdminOrderRequest)(nil),        // 5: online_market.api.v1.GetAdminOrderRequest
+	(*GetAdminOrderResponse)(nil),       // 6: online_market.api.v1.GetAdminOrderResponse
+	(*OrderDetailsPatch)(nil),           // 7: online_market.api.v1.OrderDetailsPatch
+	(*UpdateOrderDetailsRequest)(nil),   // 8: online_market.api.v1.UpdateOrderDetailsRequest
+	(*UpdateOrderDetailsResponse)(nil),  // 9: online_market.api.v1.UpdateOrderDetailsResponse
+	(*AddOrderItemRequest)(nil),         // 10: online_market.api.v1.AddOrderItemRequest
+	(*AddOrderItemResponse)(nil),        // 11: online_market.api.v1.AddOrderItemResponse
+	(*OrderItemPatch)(nil),              // 12: online_market.api.v1.OrderItemPatch
+	(*UpdateOrderItemRequest)(nil),      // 13: online_market.api.v1.UpdateOrderItemRequest
+	(*UpdateOrderItemResponse)(nil),     // 14: online_market.api.v1.UpdateOrderItemResponse
+	(*RemoveOrderItemRequest)(nil),      // 15: online_market.api.v1.RemoveOrderItemRequest
+	(*RemoveOrderItemResponse)(nil),     // 16: online_market.api.v1.RemoveOrderItemResponse
+	(*ChangeOrderStatusRequest)(nil),    // 17: online_market.api.v1.ChangeOrderStatusRequest
+	(*ChangeOrderStatusResponse)(nil),   // 18: online_market.api.v1.ChangeOrderStatusResponse
+	(*OrderFieldChange)(nil),            // 19: online_market.api.v1.OrderFieldChange
+	(*OrderEvent)(nil),                  // 20: online_market.api.v1.OrderEvent
+	(*ListOrderEventsRequest)(nil),      // 21: online_market.api.v1.ListOrderEventsRequest
+	(*ListOrderEventsResponse)(nil),     // 22: online_market.api.v1.ListOrderEventsResponse
+	(*SetDeliveryDayLimitRequest)(nil),  // 23: online_market.api.v1.SetDeliveryDayLimitRequest
+	(*SetDeliveryDayLimitResponse)(nil), // 24: online_market.api.v1.SetDeliveryDayLimitResponse
+	(*CreateDeliveryPlaceRequest)(nil),  // 25: online_market.api.v1.CreateDeliveryPlaceRequest
+	(*CreateDeliveryPlaceResponse)(nil), // 26: online_market.api.v1.CreateDeliveryPlaceResponse
+	(*UpdateDeliveryPlaceRequest)(nil),  // 27: online_market.api.v1.UpdateDeliveryPlaceRequest
+	(*UpdateDeliveryPlaceResponse)(nil), // 28: online_market.api.v1.UpdateDeliveryPlaceResponse
+	(*DeleteDeliveryPlaceRequest)(nil),  // 29: online_market.api.v1.DeleteDeliveryPlaceRequest
+	(*DeleteDeliveryPlaceResponse)(nil), // 30: online_market.api.v1.DeleteDeliveryPlaceResponse
+	(*Order)(nil),                       // 31: online_market.api.v1.Order
+	(OrderStatus)(0),                    // 32: online_market.api.v1.OrderStatus
+	(*timestamppb.Timestamp)(nil),       // 33: google.protobuf.Timestamp
+	(*PageRequest)(nil),                 // 34: online_market.api.v1.PageRequest
+	(*PageResponse)(nil),                // 35: online_market.api.v1.PageResponse
+	(*CustomerContact)(nil),             // 36: online_market.api.v1.CustomerContact
+	(*DeliveryDetails)(nil),             // 37: online_market.api.v1.DeliveryDetails
+	(*fieldmaskpb.FieldMask)(nil),       // 38: google.protobuf.FieldMask
+	(*Money)(nil),                       // 39: online_market.api.v1.Money
+	(*DeliveryDay)(nil),                 // 40: online_market.api.v1.DeliveryDay
+	(DeliveryScheduleKind)(0),           // 41: online_market.api.v1.DeliveryScheduleKind
+	(*DeliveryPlace)(nil),               // 42: online_market.api.v1.DeliveryPlace
 }
 var file_online_market_v1_admin_order_proto_depIdxs = []int32{
-	23, // 0: online_market.api.v1.AdminOrder.order:type_name -> online_market.api.v1.Order
-	24, // 1: online_market.api.v1.OrderListFilter.statuses:type_name -> online_market.api.v1.OrderStatus
-	25, // 2: online_market.api.v1.OrderListFilter.created_from:type_name -> google.protobuf.Timestamp
-	25, // 3: online_market.api.v1.OrderListFilter.created_to:type_name -> google.protobuf.Timestamp
+	31, // 0: online_market.api.v1.AdminOrder.order:type_name -> online_market.api.v1.Order
+	32, // 1: online_market.api.v1.OrderListFilter.statuses:type_name -> online_market.api.v1.OrderStatus
+	33, // 2: online_market.api.v1.OrderListFilter.created_from:type_name -> google.protobuf.Timestamp
+	33, // 3: online_market.api.v1.OrderListFilter.created_to:type_name -> google.protobuf.Timestamp
 	2,  // 4: online_market.api.v1.ListAdminOrdersRequest.filter:type_name -> online_market.api.v1.OrderListFilter
-	26, // 5: online_market.api.v1.ListAdminOrdersRequest.page:type_name -> online_market.api.v1.PageRequest
+	34, // 5: online_market.api.v1.ListAdminOrdersRequest.page:type_name -> online_market.api.v1.PageRequest
 	1,  // 6: online_market.api.v1.ListAdminOrdersResponse.orders:type_name -> online_market.api.v1.AdminOrder
-	27, // 7: online_market.api.v1.ListAdminOrdersResponse.page:type_name -> online_market.api.v1.PageResponse
+	35, // 7: online_market.api.v1.ListAdminOrdersResponse.page:type_name -> online_market.api.v1.PageResponse
 	1,  // 8: online_market.api.v1.GetAdminOrderResponse.order:type_name -> online_market.api.v1.AdminOrder
-	28, // 9: online_market.api.v1.OrderDetailsPatch.customer:type_name -> online_market.api.v1.CustomerContact
-	29, // 10: online_market.api.v1.OrderDetailsPatch.delivery:type_name -> online_market.api.v1.DeliveryDetails
+	36, // 9: online_market.api.v1.OrderDetailsPatch.customer:type_name -> online_market.api.v1.CustomerContact
+	37, // 10: online_market.api.v1.OrderDetailsPatch.delivery:type_name -> online_market.api.v1.DeliveryDetails
 	7,  // 11: online_market.api.v1.UpdateOrderDetailsRequest.patch:type_name -> online_market.api.v1.OrderDetailsPatch
-	30, // 12: online_market.api.v1.UpdateOrderDetailsRequest.update_mask:type_name -> google.protobuf.FieldMask
+	38, // 12: online_market.api.v1.UpdateOrderDetailsRequest.update_mask:type_name -> google.protobuf.FieldMask
 	1,  // 13: online_market.api.v1.UpdateOrderDetailsResponse.order:type_name -> online_market.api.v1.AdminOrder
-	31, // 14: online_market.api.v1.AddOrderItemRequest.unit_price:type_name -> online_market.api.v1.Money
+	39, // 14: online_market.api.v1.AddOrderItemRequest.unit_price:type_name -> online_market.api.v1.Money
 	1,  // 15: online_market.api.v1.AddOrderItemResponse.order:type_name -> online_market.api.v1.AdminOrder
-	31, // 16: online_market.api.v1.OrderItemPatch.unit_price:type_name -> online_market.api.v1.Money
+	39, // 16: online_market.api.v1.OrderItemPatch.unit_price:type_name -> online_market.api.v1.Money
 	12, // 17: online_market.api.v1.UpdateOrderItemRequest.patch:type_name -> online_market.api.v1.OrderItemPatch
-	30, // 18: online_market.api.v1.UpdateOrderItemRequest.update_mask:type_name -> google.protobuf.FieldMask
+	38, // 18: online_market.api.v1.UpdateOrderItemRequest.update_mask:type_name -> google.protobuf.FieldMask
 	1,  // 19: online_market.api.v1.UpdateOrderItemResponse.order:type_name -> online_market.api.v1.AdminOrder
 	1,  // 20: online_market.api.v1.RemoveOrderItemResponse.order:type_name -> online_market.api.v1.AdminOrder
-	24, // 21: online_market.api.v1.ChangeOrderStatusRequest.status:type_name -> online_market.api.v1.OrderStatus
+	32, // 21: online_market.api.v1.ChangeOrderStatusRequest.status:type_name -> online_market.api.v1.OrderStatus
 	1,  // 22: online_market.api.v1.ChangeOrderStatusResponse.order:type_name -> online_market.api.v1.AdminOrder
 	0,  // 23: online_market.api.v1.OrderEvent.type:type_name -> online_market.api.v1.OrderEventType
 	19, // 24: online_market.api.v1.OrderEvent.changes:type_name -> online_market.api.v1.OrderFieldChange
-	25, // 25: online_market.api.v1.OrderEvent.created_at:type_name -> google.protobuf.Timestamp
-	26, // 26: online_market.api.v1.ListOrderEventsRequest.page:type_name -> online_market.api.v1.PageRequest
+	33, // 25: online_market.api.v1.OrderEvent.created_at:type_name -> google.protobuf.Timestamp
+	34, // 26: online_market.api.v1.ListOrderEventsRequest.page:type_name -> online_market.api.v1.PageRequest
 	20, // 27: online_market.api.v1.ListOrderEventsResponse.events:type_name -> online_market.api.v1.OrderEvent
-	27, // 28: online_market.api.v1.ListOrderEventsResponse.page:type_name -> online_market.api.v1.PageResponse
-	3,  // 29: online_market.api.v1.AdminOrderService.ListOrders:input_type -> online_market.api.v1.ListAdminOrdersRequest
-	5,  // 30: online_market.api.v1.AdminOrderService.GetOrder:input_type -> online_market.api.v1.GetAdminOrderRequest
-	8,  // 31: online_market.api.v1.AdminOrderService.UpdateOrderDetails:input_type -> online_market.api.v1.UpdateOrderDetailsRequest
-	10, // 32: online_market.api.v1.AdminOrderService.AddOrderItem:input_type -> online_market.api.v1.AddOrderItemRequest
-	13, // 33: online_market.api.v1.AdminOrderService.UpdateOrderItem:input_type -> online_market.api.v1.UpdateOrderItemRequest
-	15, // 34: online_market.api.v1.AdminOrderService.RemoveOrderItem:input_type -> online_market.api.v1.RemoveOrderItemRequest
-	17, // 35: online_market.api.v1.AdminOrderService.ChangeOrderStatus:input_type -> online_market.api.v1.ChangeOrderStatusRequest
-	21, // 36: online_market.api.v1.AdminOrderService.ListOrderEvents:input_type -> online_market.api.v1.ListOrderEventsRequest
-	4,  // 37: online_market.api.v1.AdminOrderService.ListOrders:output_type -> online_market.api.v1.ListAdminOrdersResponse
-	6,  // 38: online_market.api.v1.AdminOrderService.GetOrder:output_type -> online_market.api.v1.GetAdminOrderResponse
-	9,  // 39: online_market.api.v1.AdminOrderService.UpdateOrderDetails:output_type -> online_market.api.v1.UpdateOrderDetailsResponse
-	11, // 40: online_market.api.v1.AdminOrderService.AddOrderItem:output_type -> online_market.api.v1.AddOrderItemResponse
-	14, // 41: online_market.api.v1.AdminOrderService.UpdateOrderItem:output_type -> online_market.api.v1.UpdateOrderItemResponse
-	16, // 42: online_market.api.v1.AdminOrderService.RemoveOrderItem:output_type -> online_market.api.v1.RemoveOrderItemResponse
-	18, // 43: online_market.api.v1.AdminOrderService.ChangeOrderStatus:output_type -> online_market.api.v1.ChangeOrderStatusResponse
-	22, // 44: online_market.api.v1.AdminOrderService.ListOrderEvents:output_type -> online_market.api.v1.ListOrderEventsResponse
-	37, // [37:45] is the sub-list for method output_type
-	29, // [29:37] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	35, // 28: online_market.api.v1.ListOrderEventsResponse.page:type_name -> online_market.api.v1.PageResponse
+	40, // 29: online_market.api.v1.SetDeliveryDayLimitResponse.day:type_name -> online_market.api.v1.DeliveryDay
+	41, // 30: online_market.api.v1.CreateDeliveryPlaceRequest.schedule_kind:type_name -> online_market.api.v1.DeliveryScheduleKind
+	42, // 31: online_market.api.v1.CreateDeliveryPlaceResponse.place:type_name -> online_market.api.v1.DeliveryPlace
+	41, // 32: online_market.api.v1.UpdateDeliveryPlaceRequest.schedule_kind:type_name -> online_market.api.v1.DeliveryScheduleKind
+	42, // 33: online_market.api.v1.UpdateDeliveryPlaceResponse.place:type_name -> online_market.api.v1.DeliveryPlace
+	3,  // 34: online_market.api.v1.AdminOrderService.ListOrders:input_type -> online_market.api.v1.ListAdminOrdersRequest
+	5,  // 35: online_market.api.v1.AdminOrderService.GetOrder:input_type -> online_market.api.v1.GetAdminOrderRequest
+	8,  // 36: online_market.api.v1.AdminOrderService.UpdateOrderDetails:input_type -> online_market.api.v1.UpdateOrderDetailsRequest
+	10, // 37: online_market.api.v1.AdminOrderService.AddOrderItem:input_type -> online_market.api.v1.AddOrderItemRequest
+	13, // 38: online_market.api.v1.AdminOrderService.UpdateOrderItem:input_type -> online_market.api.v1.UpdateOrderItemRequest
+	15, // 39: online_market.api.v1.AdminOrderService.RemoveOrderItem:input_type -> online_market.api.v1.RemoveOrderItemRequest
+	17, // 40: online_market.api.v1.AdminOrderService.ChangeOrderStatus:input_type -> online_market.api.v1.ChangeOrderStatusRequest
+	21, // 41: online_market.api.v1.AdminOrderService.ListOrderEvents:input_type -> online_market.api.v1.ListOrderEventsRequest
+	23, // 42: online_market.api.v1.AdminOrderService.SetDeliveryDayLimit:input_type -> online_market.api.v1.SetDeliveryDayLimitRequest
+	25, // 43: online_market.api.v1.AdminOrderService.CreateDeliveryPlace:input_type -> online_market.api.v1.CreateDeliveryPlaceRequest
+	27, // 44: online_market.api.v1.AdminOrderService.UpdateDeliveryPlace:input_type -> online_market.api.v1.UpdateDeliveryPlaceRequest
+	29, // 45: online_market.api.v1.AdminOrderService.DeleteDeliveryPlace:input_type -> online_market.api.v1.DeleteDeliveryPlaceRequest
+	4,  // 46: online_market.api.v1.AdminOrderService.ListOrders:output_type -> online_market.api.v1.ListAdminOrdersResponse
+	6,  // 47: online_market.api.v1.AdminOrderService.GetOrder:output_type -> online_market.api.v1.GetAdminOrderResponse
+	9,  // 48: online_market.api.v1.AdminOrderService.UpdateOrderDetails:output_type -> online_market.api.v1.UpdateOrderDetailsResponse
+	11, // 49: online_market.api.v1.AdminOrderService.AddOrderItem:output_type -> online_market.api.v1.AddOrderItemResponse
+	14, // 50: online_market.api.v1.AdminOrderService.UpdateOrderItem:output_type -> online_market.api.v1.UpdateOrderItemResponse
+	16, // 51: online_market.api.v1.AdminOrderService.RemoveOrderItem:output_type -> online_market.api.v1.RemoveOrderItemResponse
+	18, // 52: online_market.api.v1.AdminOrderService.ChangeOrderStatus:output_type -> online_market.api.v1.ChangeOrderStatusResponse
+	22, // 53: online_market.api.v1.AdminOrderService.ListOrderEvents:output_type -> online_market.api.v1.ListOrderEventsResponse
+	24, // 54: online_market.api.v1.AdminOrderService.SetDeliveryDayLimit:output_type -> online_market.api.v1.SetDeliveryDayLimitResponse
+	26, // 55: online_market.api.v1.AdminOrderService.CreateDeliveryPlace:output_type -> online_market.api.v1.CreateDeliveryPlaceResponse
+	28, // 56: online_market.api.v1.AdminOrderService.UpdateDeliveryPlace:output_type -> online_market.api.v1.UpdateDeliveryPlaceResponse
+	30, // 57: online_market.api.v1.AdminOrderService.DeleteDeliveryPlace:output_type -> online_market.api.v1.DeleteDeliveryPlaceResponse
+	46, // [46:58] is the sub-list for method output_type
+	34, // [34:46] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_online_market_v1_admin_order_proto_init() }
@@ -1616,7 +2079,7 @@ func file_online_market_v1_admin_order_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_online_market_v1_admin_order_proto_rawDesc), len(file_online_market_v1_admin_order_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   22,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

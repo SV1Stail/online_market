@@ -70,7 +70,7 @@ func run(logger *slog.Logger) error {
 	adminCatalogService := catalog.NewAdminService(catalogRepository, idGenerator)
 	cartRepository := cart.NewPostgresRepository(pool)
 	cartService := cart.NewService(cartRepository, catalogService, systemClock, idGenerator, configValue.CartTTL)
-	orderRepository := order.NewPostgresRepository(pool)
+	orderRepository := order.NewPostgresRepository(pool, configValue.DeliveryDailyLimit, configValue.MinOrderTotalMinor)
 	orderService := order.NewService(
 		orderRepository,
 		systemClock,
@@ -78,7 +78,7 @@ func run(logger *slog.Logger) error {
 		security.NewCapabilityTokens(configValue.OrderTokenSecret),
 		configValue.NotificationChannels,
 	)
-	adminOrderService := order.NewAdminService(orderRepository, configValue.NotificationChannels)
+	adminOrderService := order.NewAdminService(orderRepository, configValue.NotificationChannels, systemClock)
 	authRepository := auth.NewPostgresRepository(pool)
 	authService := auth.NewService(
 		authRepository,

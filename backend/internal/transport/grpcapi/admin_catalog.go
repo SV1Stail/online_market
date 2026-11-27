@@ -62,9 +62,15 @@ func (s *AdminCatalogServer) CreateProduct(ctx context.Context, request *marketv
 	if err != nil {
 		return nil, apperror.Validation("availability", "must be specified")
 	}
+	minOrderAmount, err := moneyFromProto(request.GetMinOrderAmount())
+	if err != nil {
+		return nil, apperror.Validation("min_order_amount", err.Error())
+	}
 	product, err := s.service.CreateProduct(ctx, catalog.ProductPatch{
 		Name: request.GetName(), Description: request.GetDescription(), Price: price,
 		Availability: availability, CategoryIDs: request.GetCategoryIds(),
+		UnitOfMeasure: request.GetUnitOfMeasure(), MinOrderQuantity: request.GetMinOrderQuantity(),
+		MinOrderAmount: minOrderAmount,
 	})
 	if err != nil {
 		return nil, err
@@ -80,6 +86,10 @@ func (s *AdminCatalogServer) UpdateProduct(ctx context.Context, request *marketv
 	if err != nil {
 		return nil, apperror.Validation("patch.price", err.Error())
 	}
+	minOrderAmount, err := moneyFromProto(request.GetPatch().GetMinOrderAmount())
+	if err != nil {
+		return nil, apperror.Validation("patch.min_order_amount", err.Error())
+	}
 	availability := catalog.Availability("")
 	if request.GetPatch().GetAvailability() != marketv1.ProductAvailability_PRODUCT_AVAILABILITY_UNSPECIFIED {
 		availability, err = availabilityFromProto(request.GetPatch().GetAvailability())
@@ -89,7 +99,9 @@ func (s *AdminCatalogServer) UpdateProduct(ctx context.Context, request *marketv
 	}
 	product, err := s.service.UpdateProduct(ctx, request.GetProductId(), request.GetExpectedVersion(), catalog.ProductPatch{
 		Name: request.GetPatch().GetName(), Description: request.GetPatch().GetDescription(), Price: price,
-		Availability: availability, CategoryIDs: request.GetPatch().GetCategoryIds(), Paths: maskPaths(request.GetUpdateMask()),
+		Availability: availability, CategoryIDs: request.GetPatch().GetCategoryIds(),
+		UnitOfMeasure: request.GetPatch().GetUnitOfMeasure(), MinOrderQuantity: request.GetPatch().GetMinOrderQuantity(),
+		MinOrderAmount: minOrderAmount, Paths: maskPaths(request.GetUpdateMask()),
 	})
 	if err != nil {
 		return nil, err

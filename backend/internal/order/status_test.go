@@ -15,7 +15,7 @@ func TestCanTransition(t *testing.T) {
 	}{
 		{name: "new order can be confirmed", from: StatusNew, to: StatusConfirmed, want: true},
 		{name: "new order can be cancelled", from: StatusNew, to: StatusCancelled, want: true},
-		{name: "ready pickup can complete", from: StatusReady, to: StatusCompleted, want: true},
+		{name: "ready can complete", from: StatusReady, to: StatusCompleted, want: true},
 		{name: "delivery can complete", from: StatusInDelivery, to: StatusCompleted, want: true},
 		{name: "completed order is terminal", from: StatusCompleted, to: StatusCancelled, want: false},
 		{name: "cancelled order is terminal", from: StatusCancelled, to: StatusNew, want: false},

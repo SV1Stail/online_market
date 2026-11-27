@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/SV1Stail/online_market/internal/apperror"
+	"github.com/SV1Stail/online_market/internal/money"
 )
 
 func (r *PostgresRepository) ListAdminProducts(ctx context.Context, filter AdminListFilter) ([]Product, error) {
@@ -28,8 +29,9 @@ func (r *PostgresRepository) ListAdminProducts(ctx context.Context, filter Admin
 	}
 	rows, err := r.pool.Query(ctx, `
 		SELECT
-			p.id::text, p.name, p.description, p.price_minor_units,
-			p.currency_code, p.availability, p.version, p.created_at, p.updated_at,
+			p.id::text, p.name, p.description, p.price_minor_units, p.currency_code,
+			p.unit_of_measure, p.min_order_quantity, p.min_order_amount_minor_units,
+			p.availability, p.version, p.created_at, p.updated_at,
 			COALESCE(
 				array_agg(pc.category_id::text ORDER BY pc.category_id)
 					FILTER (WHERE pc.category_id IS NOT NULL),
@@ -85,9 +87,11 @@ func (r *PostgresRepository) CreateProduct(ctx context.Context, product Product)
 	defer func() { _ = tx.Rollback(ctx) }()
 	_, err = tx.Exec(ctx, `
 		INSERT INTO products (
-			id, name, description, price_minor_units, currency_code, availability, version
-		) VALUES ($1::uuid, $2, $3, $4, $5, $6, 1)
-	`, product.ID, product.Name, product.Description, product.Price.MinorUnits, product.Price.Currency, product.Availability)
+			id, name, description, price_minor_units, currency_code, availability, version,
+			unit_of_measure, min_order_quantity, min_order_amount_minor_units
+		) VALUES ($1::uuid, $2, $3, $4, $5, $6, 1, $7, $8, $9)
+	`, product.ID, product.Name, product.Description, product.Price.MinorUnits, product.Price.Currency, product.Availability,
+		product.UnitOfMeasure, product.MinOrderQuantity, nullableMinorUnits(product.MinOrderAmount))
 	if err != nil {
 		return nil, fmt.Errorf("insert product: %w", err)
 	}
@@ -129,6 +133,15 @@ func (r *PostgresRepository) UpdateProduct(ctx context.Context, productID string
 		case "availability":
 			arguments = append(arguments, patch.Availability)
 			sets = append(sets, fmt.Sprintf("availability = $%d", len(arguments)))
+		case "unit_of_measure":
+			arguments = append(arguments, patch.UnitOfMeasure)
+			sets = append(sets, fmt.Sprintf("unit_of_measure = $%d", len(arguments)))
+		case "min_order_quantity":
+			arguments = append(arguments, patch.MinOrderQuantity)
+			sets = append(sets, fmt.Sprintf("min_order_quantity = $%d", len(arguments)))
+		case "min_order_amount":
+			arguments = append(arguments, nullableMinorUnits(patch.MinOrderAmount))
+			sets = append(sets, fmt.Sprintf("min_order_amount_minor_units = $%d", len(arguments)))
 		case "category_ids":
 		}
 	}
@@ -277,8 +290,9 @@ type catalogQuerier interface {
 func loadAdminProduct(ctx context.Context, query catalogQuerier, productID string) (*Product, error) {
 	row := query.QueryRow(ctx, `
 		SELECT
-			p.id::text, p.name, p.description, p.price_minor_units,
-			p.currency_code, p.availability, p.version, p.created_at, p.updated_at,
+			p.id::text, p.name, p.description, p.price_minor_units, p.currency_code,
+			p.unit_of_measure, p.min_order_quantity, p.min_order_amount_minor_units,
+			p.availability, p.version, p.created_at, p.updated_at,
 			COALESCE(
 				array_agg(pc.category_id::text ORDER BY pc.category_id)
 					FILTER (WHERE pc.category_id IS NOT NULL),
@@ -327,6 +341,13 @@ func insertProductCategories(ctx context.Context, tx pgx.Tx, productID string, c
 		}
 	}
 	return nil
+}
+
+func nullableMinorUnits(amount *money.Money) any {
+	if amount == nil {
+		return nil
+	}
+	return amount.MinorUnits
 }
 
 func nullableText(value string) any {

@@ -20,6 +20,8 @@ func TestRateLimitPolicies(t *testing.T) {
 	require.Equal(t, ratelimit.Policy{Name: "catalog", Rules: standardRules}, policies[marketv1.CatalogService_ListProducts_FullMethodName])
 	require.Equal(t, ratelimit.Policy{Name: "cart", Rules: standardRules}, policies[marketv1.CartService_AddCartItem_FullMethodName])
 	require.Equal(t, ratelimit.Policy{Name: "create_order", Rules: standardRules}, policies[marketv1.OrderService_CreateOrder_FullMethodName])
+	require.Equal(t, ratelimit.Policy{Name: "delivery_days", Rules: standardRules}, policies[marketv1.OrderService_ListDeliveryDays_FullMethodName])
+	require.Equal(t, ratelimit.Policy{Name: "delivery_places", Rules: standardRules}, policies[marketv1.OrderService_ListDeliveryPlaces_FullMethodName])
 	require.Equal(t, ratelimit.Policy{
 		Name:  "refresh_session",
 		Rules: []ratelimit.Rule{{Limit: 10, Window: time.Minute}},

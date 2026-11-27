@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/SV1Stail/online_market/internal/apperror"
 	"github.com/SV1Stail/online_market/internal/observability"
+	"github.com/SV1Stail/online_market/internal/order"
 )
 
 func ErrorMappingInterceptor(logger *slog.Logger) grpc.UnaryServerInterceptor {
@@ -47,6 +49,12 @@ func toStatus(err error) error {
 	case errors.Is(err, apperror.ErrConflict):
 		return status.Error(codes.Aborted, "resource was changed concurrently")
 	case errors.Is(err, apperror.ErrPrecondition):
+		if strings.Contains(err.Error(), order.DeliveryDayFullMessage) {
+			return status.Error(codes.FailedPrecondition, order.DeliveryDayFullMessage)
+		}
+		if strings.Contains(err.Error(), order.OrderMinimumMessage) {
+			return status.Error(codes.FailedPrecondition, order.OrderMinimumMessage)
+		}
 		return status.Error(codes.FailedPrecondition, "operation is not allowed in the current state")
 	default:
 		return status.Error(codes.Internal, "internal server error")

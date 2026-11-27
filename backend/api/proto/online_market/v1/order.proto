@@ -10,6 +10,8 @@ import "online_market/v1/common.proto";
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
   rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+  rpc ListDeliveryPlaces(ListDeliveryPlacesRequest) returns (ListDeliveryPlacesResponse);
+  rpc ListDeliveryDays(ListDeliveryDaysRequest) returns (ListDeliveryDaysResponse);
 }
 
 enum OrderStatus {
@@ -40,10 +42,21 @@ message DeliveryDetails {
   string city = 2;
   string address = 3;
   string comment = 4;
+  // Calendar day the customer expects delivery, YYYY-MM-DD in the shop calendar.
+  string delivery_date = 5;
 }
 
-// OrderItem is a snapshot. Its name and price do not change when the catalog
-// product is edited later.
+// DeliveryDay is one shop calendar day and its delivery capacity.
+message DeliveryDay {
+  string date = 1;
+  uint32 booked = 2;
+  uint32 delivery_limit = 3;
+  // Slots still open. Zero means the day cannot accept another delivery.
+  uint32 remaining = 4;
+}
+
+// OrderItem is a snapshot. Its name, price, and unit label do not change when
+// the catalog product is edited later.
 message OrderItem {
   string id = 1;
   string product_id = 2;
@@ -51,6 +64,8 @@ message OrderItem {
   Money unit_price = 4;
   uint32 quantity = 5;
   Money line_total = 6;
+  // Unit label copied from the catalog when the line was added. Empty if none.
+  string unit_of_measure = 7;
 }
 
 message Order {
@@ -92,4 +107,42 @@ message GetOrderRequest {
 
 message GetOrderResponse {
   Order order = 1;
+}
+
+enum DeliveryScheduleKind {
+  DELIVERY_SCHEDULE_KIND_UNSPECIFIED = 0;
+  // Every day in the shop horizon.
+  DELIVERY_SCHEDULE_KIND_ALL = 1;
+  // Monday through Friday in the shop calendar.
+  DELIVERY_SCHEDULE_KIND_WEEKDAYS = 2;
+  // Only the dates listed on the place.
+  DELIVERY_SCHEDULE_KIND_DATES = 3;
+}
+
+message DeliveryPlace {
+  string id = 1;
+  string name = 2;
+  uint32 daily_limit = 3;
+  DeliveryScheduleKind schedule_kind = 4;
+  // YYYY-MM-DD. Used when schedule_kind is DATES.
+  repeated string dates = 5;
+}
+
+message ListDeliveryPlacesRequest {}
+
+message ListDeliveryPlacesResponse {
+  repeated DeliveryPlace places = 1;
+}
+
+message ListDeliveryDaysRequest {
+  // Inclusive first day, YYYY-MM-DD. Empty starts at the shop's current day.
+  string from_date = 1;
+  // Number of days to return. Zero uses the server horizon.
+  uint32 days = 2;
+  // City or settlement the customer wants delivery to.
+  string city = 3;
+}
+
+message ListDeliveryDaysResponse {
+  repeated DeliveryDay days = 1;
 }

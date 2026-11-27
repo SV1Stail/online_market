@@ -2,6 +2,7 @@ package cart
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -259,7 +260,10 @@ func getCart(ctx context.Context, query cartQuerier, cartID string, tokenHash []
 			p.price_minor_units,
 			p.currency_code,
 			ci.quantity,
-			p.availability
+			p.availability,
+			p.unit_of_measure,
+			p.min_order_quantity,
+			p.min_order_amount_minor_units
 		FROM cart_items ci
 		JOIN products p ON p.id = ci.product_id
 		WHERE ci.cart_id = $1::uuid
@@ -275,6 +279,8 @@ func getCart(ctx context.Context, query cartQuerier, cartID string, tokenHash []
 		var item Item
 		var minorUnits int64
 		var itemCurrency string
+		var minQuantity int32
+		var minAmount sql.NullInt64
 		if err := rows.Scan(
 			&item.ID,
 			&item.ProductID,
@@ -283,12 +289,26 @@ func getCart(ctx context.Context, query cartQuerier, cartID string, tokenHash []
 			&itemCurrency,
 			&item.Quantity,
 			&item.Availability,
+			&item.UnitOfMeasure,
+			&minQuantity,
+			&minAmount,
 		); err != nil {
 			return nil, fmt.Errorf("scan cart item: %w", err)
 		}
+		if minQuantity < 0 {
+			return nil, fmt.Errorf("invalid cart item minimum quantity")
+		}
+		item.MinOrderQuantity = uint32(minQuantity)
 		unitPrice, err := money.New(minorUnits, itemCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("invalid cart item price: %w", err)
+		}
+		if minAmount.Valid {
+			amount, err := money.New(minAmount.Int64, itemCurrency)
+			if err != nil {
+				return nil, fmt.Errorf("invalid cart item minimum amount: %w", err)
+			}
+			item.MinOrderAmount = &amount
 		}
 		item.UnitPrice = unitPrice
 		item.LineTotal, err = unitPrice.Multiply(item.Quantity)

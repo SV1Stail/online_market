@@ -79,10 +79,14 @@ func (s *AdminOrderServer) UpdateOrderDetails(ctx context.Context, request *mark
 	if patch == nil {
 		return nil, apperror.Validation("patch", "is required")
 	}
+	delivery, err := deliveryFromProto(patch.GetDelivery())
+	if err != nil {
+		return nil, apperror.Validation("delivery.date", "must use YYYY-MM-DD")
+	}
 	result, serviceErr := s.service.UpdateDetails(ctx, request.GetOrderId(), request.GetExpectedVersion(), principal.UserID, order.DetailsPatch{
 		Name:            patch.GetName(),
 		Customer:        customerFromProto(patch.GetCustomer()),
-		Delivery:        deliveryFromProto(patch.GetDelivery()),
+		Delivery:        delivery,
 		CustomerComment: patch.GetCustomerComment(),
 		InternalComment: patch.GetInternalComment(),
 		AssignedAdminID: patch.GetAssignedAdminId(),
@@ -199,6 +203,62 @@ func (s *AdminOrderServer) ListOrderEvents(ctx context.Context, request *marketv
 		Events: events,
 		Page:   &marketv1.PageResponse{NextPageToken: result.NextPageToken},
 	}, nil
+}
+
+func (s *AdminOrderServer) SetDeliveryDayLimit(ctx context.Context, request *marketv1.SetDeliveryDayLimitRequest) (*marketv1.SetDeliveryDayLimitResponse, error) {
+	if _, err := principalFromContext(ctx); err != nil {
+		return nil, err
+	}
+	date, err := order.ParseDeliveryDate(request.GetDate())
+	if err != nil || date.IsZero() {
+		return nil, apperror.Validation("date", "must use YYYY-MM-DD")
+	}
+	day, err := s.service.SetDeliveryDayLimit(ctx, date, int(request.GetDeliveryLimit()))
+	if err != nil {
+		return nil, err
+	}
+	return &marketv1.SetDeliveryDayLimitResponse{Day: deliveryDayToProto(day)}, nil
+}
+
+func (s *AdminOrderServer) CreateDeliveryPlace(ctx context.Context, request *marketv1.CreateDeliveryPlaceRequest) (*marketv1.CreateDeliveryPlaceResponse, error) {
+	if _, err := principalFromContext(ctx); err != nil {
+		return nil, err
+	}
+	place, err := deliveryPlaceFromInput(request.GetName(), request.GetDailyLimit(), request.GetScheduleKind(), request.GetDates())
+	if err != nil {
+		return nil, err
+	}
+	created, err := s.service.CreateDeliveryPlace(ctx, place)
+	if err != nil {
+		return nil, err
+	}
+	return &marketv1.CreateDeliveryPlaceResponse{Place: deliveryPlaceToProto(created)}, nil
+}
+
+func (s *AdminOrderServer) UpdateDeliveryPlace(ctx context.Context, request *marketv1.UpdateDeliveryPlaceRequest) (*marketv1.UpdateDeliveryPlaceResponse, error) {
+	if _, err := principalFromContext(ctx); err != nil {
+		return nil, err
+	}
+	place, err := deliveryPlaceFromInput(request.GetName(), request.GetDailyLimit(), request.GetScheduleKind(), request.GetDates())
+	if err != nil {
+		return nil, err
+	}
+	place.ID = request.GetPlaceId()
+	updated, err := s.service.UpdateDeliveryPlace(ctx, place)
+	if err != nil {
+		return nil, err
+	}
+	return &marketv1.UpdateDeliveryPlaceResponse{Place: deliveryPlaceToProto(updated)}, nil
+}
+
+func (s *AdminOrderServer) DeleteDeliveryPlace(ctx context.Context, request *marketv1.DeleteDeliveryPlaceRequest) (*marketv1.DeleteDeliveryPlaceResponse, error) {
+	if _, err := principalFromContext(ctx); err != nil {
+		return nil, err
+	}
+	if err := s.service.DeleteDeliveryPlace(ctx, request.GetPlaceId()); err != nil {
+		return nil, err
+	}
+	return &marketv1.DeleteDeliveryPlaceResponse{}, nil
 }
 
 type pageInput struct {

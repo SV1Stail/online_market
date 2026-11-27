@@ -75,16 +75,22 @@ func (CartStatus) EnumDescriptor() ([]byte, []int) {
 }
 
 type CartItem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ProductId     string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
-	ProductName   string                 `protobuf:"bytes,3,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
-	UnitPrice     *Money                 `protobuf:"bytes,5,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
-	Quantity      uint32                 `protobuf:"varint,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
-	LineTotal     *Money                 `protobuf:"bytes,7,opt,name=line_total,json=lineTotal,proto3" json:"line_total,omitempty"`
-	Availability  ProductAvailability    `protobuf:"varint,8,opt,name=availability,proto3,enum=online_market.api.v1.ProductAvailability" json:"availability,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Id           string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProductId    string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	ProductName  string                 `protobuf:"bytes,3,opt,name=product_name,json=productName,proto3" json:"product_name,omitempty"`
+	UnitPrice    *Money                 `protobuf:"bytes,5,opt,name=unit_price,json=unitPrice,proto3" json:"unit_price,omitempty"`
+	Quantity     uint32                 `protobuf:"varint,6,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	LineTotal    *Money                 `protobuf:"bytes,7,opt,name=line_total,json=lineTotal,proto3" json:"line_total,omitempty"`
+	Availability ProductAvailability    `protobuf:"varint,8,opt,name=availability,proto3,enum=online_market.api.v1.ProductAvailability" json:"availability,omitempty"`
+	// Current catalog label for one priced unit. Empty when the product has none.
+	UnitOfMeasure string `protobuf:"bytes,9,opt,name=unit_of_measure,json=unitOfMeasure,proto3" json:"unit_of_measure,omitempty"`
+	// Current catalog minimum quantity. Zero means the product has no minimum.
+	MinOrderQuantity uint32 `protobuf:"varint,10,opt,name=min_order_quantity,json=minOrderQuantity,proto3" json:"min_order_quantity,omitempty"`
+	// Current catalog minimum line total. Absent means the product has no minimum amount.
+	MinOrderAmount *Money `protobuf:"bytes,11,opt,name=min_order_amount,json=minOrderAmount,proto3" json:"min_order_amount,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CartItem) Reset() {
@@ -164,6 +170,27 @@ func (x *CartItem) GetAvailability() ProductAvailability {
 		return x.Availability
 	}
 	return ProductAvailability_PRODUCT_AVAILABILITY_UNSPECIFIED
+}
+
+func (x *CartItem) GetUnitOfMeasure() string {
+	if x != nil {
+		return x.UnitOfMeasure
+	}
+	return ""
+}
+
+func (x *CartItem) GetMinOrderQuantity() uint32 {
+	if x != nil {
+		return x.MinOrderQuantity
+	}
+	return 0
+}
+
+func (x *CartItem) GetMinOrderAmount() *Money {
+	if x != nil {
+		return x.MinOrderAmount
+	}
+	return nil
 }
 
 type Cart struct {
@@ -922,7 +949,7 @@ var File_online_market_v1_cart_proto protoreflect.FileDescriptor
 
 const file_online_market_v1_cart_proto_rawDesc = "" +
 	"\n" +
-	"\x1bonline_market/v1/cart.proto\x12\x14online_market.api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eonline_market/v1/catalog.proto\x1a\x1donline_market/v1/common.proto\"\xd8\x02\n" +
+	"\x1bonline_market/v1/cart.proto\x12\x14online_market.api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1eonline_market/v1/catalog.proto\x1a\x1donline_market/v1/common.proto\"\xf5\x03\n" +
 	"\bCartItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -933,7 +960,11 @@ const file_online_market_v1_cart_proto_rawDesc = "" +
 	"\bquantity\x18\x06 \x01(\rR\bquantity\x12:\n" +
 	"\n" +
 	"line_total\x18\a \x01(\v2\x1b.online_market.api.v1.MoneyR\tlineTotal\x12M\n" +
-	"\favailability\x18\b \x01(\x0e2).online_market.api.v1.ProductAvailabilityR\favailabilityJ\x04\b\x04\x10\x05R\x11product_image_url\"\x84\x03\n" +
+	"\favailability\x18\b \x01(\x0e2).online_market.api.v1.ProductAvailabilityR\favailability\x12&\n" +
+	"\x0funit_of_measure\x18\t \x01(\tR\runitOfMeasure\x12,\n" +
+	"\x12min_order_quantity\x18\n" +
+	" \x01(\rR\x10minOrderQuantity\x12E\n" +
+	"\x10min_order_amount\x18\v \x01(\v2\x1b.online_market.api.v1.MoneyR\x0eminOrderAmountJ\x04\b\x04\x10\x05R\x11product_image_url\"\x84\x03\n" +
 	"\x04Cart\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x128\n" +
 	"\x06status\x18\x02 \x01(\x0e2 .online_market.api.v1.CartStatusR\x06status\x124\n" +
@@ -1045,35 +1076,36 @@ var file_online_market_v1_cart_proto_depIdxs = []int32{
 	15, // 0: online_market.api.v1.CartItem.unit_price:type_name -> online_market.api.v1.Money
 	15, // 1: online_market.api.v1.CartItem.line_total:type_name -> online_market.api.v1.Money
 	16, // 2: online_market.api.v1.CartItem.availability:type_name -> online_market.api.v1.ProductAvailability
-	0,  // 3: online_market.api.v1.Cart.status:type_name -> online_market.api.v1.CartStatus
-	1,  // 4: online_market.api.v1.Cart.items:type_name -> online_market.api.v1.CartItem
-	15, // 5: online_market.api.v1.Cart.total:type_name -> online_market.api.v1.Money
-	17, // 6: online_market.api.v1.Cart.created_at:type_name -> google.protobuf.Timestamp
-	17, // 7: online_market.api.v1.Cart.updated_at:type_name -> google.protobuf.Timestamp
-	17, // 8: online_market.api.v1.Cart.expires_at:type_name -> google.protobuf.Timestamp
-	2,  // 9: online_market.api.v1.CreateCartResponse.cart:type_name -> online_market.api.v1.Cart
-	2,  // 10: online_market.api.v1.GetCartResponse.cart:type_name -> online_market.api.v1.Cart
-	2,  // 11: online_market.api.v1.AddCartItemResponse.cart:type_name -> online_market.api.v1.Cart
-	2,  // 12: online_market.api.v1.UpdateCartItemResponse.cart:type_name -> online_market.api.v1.Cart
-	2,  // 13: online_market.api.v1.RemoveCartItemResponse.cart:type_name -> online_market.api.v1.Cart
-	2,  // 14: online_market.api.v1.ClearCartResponse.cart:type_name -> online_market.api.v1.Cart
-	3,  // 15: online_market.api.v1.CartService.CreateCart:input_type -> online_market.api.v1.CreateCartRequest
-	5,  // 16: online_market.api.v1.CartService.GetCart:input_type -> online_market.api.v1.GetCartRequest
-	7,  // 17: online_market.api.v1.CartService.AddCartItem:input_type -> online_market.api.v1.AddCartItemRequest
-	9,  // 18: online_market.api.v1.CartService.UpdateCartItem:input_type -> online_market.api.v1.UpdateCartItemRequest
-	11, // 19: online_market.api.v1.CartService.RemoveCartItem:input_type -> online_market.api.v1.RemoveCartItemRequest
-	13, // 20: online_market.api.v1.CartService.ClearCart:input_type -> online_market.api.v1.ClearCartRequest
-	4,  // 21: online_market.api.v1.CartService.CreateCart:output_type -> online_market.api.v1.CreateCartResponse
-	6,  // 22: online_market.api.v1.CartService.GetCart:output_type -> online_market.api.v1.GetCartResponse
-	8,  // 23: online_market.api.v1.CartService.AddCartItem:output_type -> online_market.api.v1.AddCartItemResponse
-	10, // 24: online_market.api.v1.CartService.UpdateCartItem:output_type -> online_market.api.v1.UpdateCartItemResponse
-	12, // 25: online_market.api.v1.CartService.RemoveCartItem:output_type -> online_market.api.v1.RemoveCartItemResponse
-	14, // 26: online_market.api.v1.CartService.ClearCart:output_type -> online_market.api.v1.ClearCartResponse
-	21, // [21:27] is the sub-list for method output_type
-	15, // [15:21] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	15, // 3: online_market.api.v1.CartItem.min_order_amount:type_name -> online_market.api.v1.Money
+	0,  // 4: online_market.api.v1.Cart.status:type_name -> online_market.api.v1.CartStatus
+	1,  // 5: online_market.api.v1.Cart.items:type_name -> online_market.api.v1.CartItem
+	15, // 6: online_market.api.v1.Cart.total:type_name -> online_market.api.v1.Money
+	17, // 7: online_market.api.v1.Cart.created_at:type_name -> google.protobuf.Timestamp
+	17, // 8: online_market.api.v1.Cart.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 9: online_market.api.v1.Cart.expires_at:type_name -> google.protobuf.Timestamp
+	2,  // 10: online_market.api.v1.CreateCartResponse.cart:type_name -> online_market.api.v1.Cart
+	2,  // 11: online_market.api.v1.GetCartResponse.cart:type_name -> online_market.api.v1.Cart
+	2,  // 12: online_market.api.v1.AddCartItemResponse.cart:type_name -> online_market.api.v1.Cart
+	2,  // 13: online_market.api.v1.UpdateCartItemResponse.cart:type_name -> online_market.api.v1.Cart
+	2,  // 14: online_market.api.v1.RemoveCartItemResponse.cart:type_name -> online_market.api.v1.Cart
+	2,  // 15: online_market.api.v1.ClearCartResponse.cart:type_name -> online_market.api.v1.Cart
+	3,  // 16: online_market.api.v1.CartService.CreateCart:input_type -> online_market.api.v1.CreateCartRequest
+	5,  // 17: online_market.api.v1.CartService.GetCart:input_type -> online_market.api.v1.GetCartRequest
+	7,  // 18: online_market.api.v1.CartService.AddCartItem:input_type -> online_market.api.v1.AddCartItemRequest
+	9,  // 19: online_market.api.v1.CartService.UpdateCartItem:input_type -> online_market.api.v1.UpdateCartItemRequest
+	11, // 20: online_market.api.v1.CartService.RemoveCartItem:input_type -> online_market.api.v1.RemoveCartItemRequest
+	13, // 21: online_market.api.v1.CartService.ClearCart:input_type -> online_market.api.v1.ClearCartRequest
+	4,  // 22: online_market.api.v1.CartService.CreateCart:output_type -> online_market.api.v1.CreateCartResponse
+	6,  // 23: online_market.api.v1.CartService.GetCart:output_type -> online_market.api.v1.GetCartResponse
+	8,  // 24: online_market.api.v1.CartService.AddCartItem:output_type -> online_market.api.v1.AddCartItemResponse
+	10, // 25: online_market.api.v1.CartService.UpdateCartItem:output_type -> online_market.api.v1.UpdateCartItemResponse
+	12, // 26: online_market.api.v1.CartService.RemoveCartItem:output_type -> online_market.api.v1.RemoveCartItemResponse
+	14, // 27: online_market.api.v1.CartService.ClearCart:output_type -> online_market.api.v1.ClearCartResponse
+	22, // [22:28] is the sub-list for method output_type
+	16, // [16:22] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_online_market_v1_cart_proto_init() }

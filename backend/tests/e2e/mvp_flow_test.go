@@ -68,8 +68,11 @@ func TestMVPFlow(t *testing.T) {
 
 	createOrderRequest := &marketv1.CreateOrderRequest{
 		CartId: createdCart.GetCart().GetId(), CartToken: createdCart.GetCartToken(),
-		Customer:       &marketv1.CustomerContact{FullName: "Покупатель", Phone: "+79990000000"},
-		Delivery:       &marketv1.DeliveryDetails{Method: marketv1.DeliveryMethod_DELIVERY_METHOD_PICKUP},
+		Customer: &marketv1.CustomerContact{FullName: "Покупатель", Phone: "+79990000000"},
+		Delivery: &marketv1.DeliveryDetails{
+			Method: marketv1.DeliveryMethod_DELIVERY_METHOD_COURIER, City: "Якутск", Address: "Ленина, 1",
+			DeliveryDate: "2026-11-16",
+		},
 		IdempotencyKey: "30000000-0000-4000-8000-000000000001",
 	}
 	createdOrder, err := orderClient.CreateOrder(ctx, createOrderRequest)
@@ -218,7 +221,7 @@ func newEnvironment(t *testing.T) *environment {
 		orderRepository, clock, ids,
 		security.NewCapabilityTokens("e2e-order-token-secret-at-least-32-bytes"), nil,
 	)
-	adminOrderService := order.NewAdminService(adminOrderRepository, nil)
+	adminOrderService := order.NewAdminService(adminOrderRepository, nil, clock)
 	signer, err := security.NewSigner("e2e-access-token-secret-at-least-32-bytes")
 	require.NoError(t, err)
 	authService := auth.NewService(authRepository, clock, ids, signer, 15*time.Minute, 24*time.Hour)
